@@ -1,0 +1,128 @@
+# In this entire file the go code should be indented in the ```go code block.
+###############################################################################
+# This is the starting point of the generated Go code.
+###############################################################################
+```
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+```
+# Rest of the query generation code for golang should go in the main function.
+
+###############################################################################
+
+
+# Follow the cpdb_query.go file to generate the go code for the query.
+# It is equivalent .go file of cpdb_query.py file in python.
+# For example:  
+```
+query, err := QUERY("ergon:test").SELECT("component", "sequence_id").FROM("task").WHERE(EQ(COL("component"), STR("genesis"))).Proto()
+if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+}
+```
+# Now you should be using this query object to create the
+# GetEntitiesWithMetrics RPC call argument.
+
+#Test for query with ANCESTOR in SELECT clause.
+```
+  q0, err0 := QUERY("test_query").
+    SELECT(ANCESTOR("entity_type", "col_name")).
+    FROM("test_entity").
+    WHERE(LIKE(COL("col1"), "acr.*")).
+    GROUP_BY("col1").
+    ORDER_BY(DESCENDING("col2")).
+    LIMIT(5).
+    SKIP(2).
+    Proto()
+```
+
+# Aggregate columns without GROUP_BY.
+```
+ q1, err1 := QUERY("fetching_raw_columns").
+    SELECT("vm_name", "num_of_cpus", SUM("col_name"), METRIC("iops", "SUM")).
+    FROM("vm").
+    LIMIT(4).
+    SKIP(2).
+    SAMPLING_INTERVAL(MINUTES(1)).
+    SPAN(RECENT(HOURS(12))).
+    SHARD_IDS(shardIds).
+    FLAGS(1).
+    Proto()
+```
+
+# Count queries
+```
+q2, err2 := COUNT_QUERY("count_query_test").
+    FROM("test_entity").
+    WHERE(EXISTS(COL("col1"))).
+    GROUP_BY("col1").
+    Proto()
+```
+
+# Executing the multi sort query.
+```
+multiSortQuery, err3 := QUERY("multi_sort_query").
+    FROM("etype1").
+    SELECT("num_cpus", "memory").
+    ORDER_BY_LIST([]*QueryOrderBy{ASCENDING("num_cpus"), DESCENDING("memory")}).
+    Proto()
+```
+
+# Queries on namespace columns.
+```
+namespaceQuery, err4 := QUERY("namespace_test").
+    FROM("entity1").
+    WHERE(EQ(SetColNp(COL("col1"), "namespace1"), STR("hello"))).
+    SELECT("num_cpus", AttrWithNp("num_cpus", "np1")).
+    Proto()
+```
+
+# Creating a lookup query.
+```
+lookupQuery, err4 := QUERY("lookup_query").
+    FROM("entity1").
+    WHERE(EQ(COL("_entity_id_"), COL("col2"))).
+    SELECT("col1").
+    Proto()
+
+lookup := []*Query{lookupQuery}
+  mainQuery, err5 := QUERY("main_query").
+    FROM("entity2").
+    WHERE(EQ(COL("col2"), STR("val2"))).
+    SELECT("col2").
+    LOOKUP_QUERIES(lookup).
+    Proto()
+```
+
+# Creating a query using the correlate operator.
+```
+test_query, err6 := QUERY("correlate_operator").
+    SELECT("attr1", "attr2").
+    FROM("test_entity").
+    WHERE(CORRELATE(AND(GE(COL("attr1"), INT64(10)), LE(COL("attr2"), INT64(40))))).
+    Proto()
+```
+
+
+###############################################################################
+# This is the end point of the generated Go code.
+###############################################################################
+```
+err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+}
+fmt.Println(proto.MarshalTextString(response))
+```
+###############################################################################

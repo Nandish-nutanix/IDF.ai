@@ -1,0 +1,2502 @@
+# Auto-scraped from IDF Try Me Editor (http://10.53.56.1:5002/try-me-editor)
+# Total examples: 40
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Contains
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "impact_type"
+            }
+          }
+          operator: kContains
+          rhs {
+            leaf {
+              value {
+                str_list {
+                  value_list: "Performance"
+                }
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kContains"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Not
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        lhs {
+          comparison_expr {
+            lhs {
+              leaf {
+                column: "disks"
+              }
+            }
+            operator: kExists
+          }
+        }
+        operator : kNot
+      }
+      query_name: "where_clause_kNot"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: In
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "m1"
+            }
+          }
+          operator: kIN
+          rhs {
+            leaf {
+              value {
+                int64_list {
+                  value_list: 0
+                  value_list: 1
+                }
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kIN"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: GreaterThanEqual
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "cpu_usage"
+            }
+          }
+          operator: kGE
+          rhs {
+            leaf {
+              value {
+               int64_value: 60
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_greater_than_equal"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: LessThan
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "cpu_usage"
+            }
+          }
+          operator: kLT
+          rhs {
+            leaf {
+              value {
+               int64_value: 60
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_less_than"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Like: Match with multiple substrings
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "vdisk_capacity_list"
+            }
+          }
+          operator: kLike
+          rhs {
+            leaf {
+              value {
+               str_value: ".*1000.*|.*900.*|.*800.*"
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kLike_match_multiple_substrs"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Like: Match by substring
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "vdisk_capacity_list"
+            }
+          }
+          operator: kLike
+          rhs {
+            leaf {
+              value {
+               str_value: ".*1000.*"
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kLike_match_by_substr"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Equal
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "num_vcpus"
+            }
+          }
+          operator: kEQ
+          rhs {
+            leaf {
+              value {
+               int64_value: 4
+              }
+            }
+          }
+        }
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      query_name: "where_clause"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Like: Match by start of string
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "vdisk_capacity_list"
+            }
+          }
+          operator: kLike
+          rhs {
+            leaf {
+              value {
+               str_value: "^1000.*"
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kLike_match_by_start_of_str"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Exists
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "disks"
+            }
+          }
+          operator: kExists
+        }
+      }
+      query_name: "where_clause_kExists"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Nested Where Clause
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+   query {
+    entity_list {
+      entity_type_name: "vm"
+    }
+    where_clause {
+      lhs { 
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "node"
+            }
+          }
+          operator: kNE
+          rhs {
+            leaf {
+              value {
+                str_value: "node_1"
+              }
+            }
+          }
+        }
+      }
+      operator: kAnd
+      rhs {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "vm_name"
+            }
+          }
+          operator: kExists   
+        }
+      }
+     }
+    query_name: "nested_where_clause"
+    }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Any
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "impact_type"
+            }
+          }
+          operator: kAny
+          rhs {
+            leaf {
+              value {
+                str_list {
+                  value_list: "Availability"
+                  value_list: "Capacity"
+                  value_list: "Configuration"
+                  value_list: "Performance"
+                  value_list: "SystemIndicator"
+                }
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kAny"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: Like: Match by start and end of string
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "vdisk_capacity_list"
+            }
+          }
+          operator: kLike
+          rhs {
+            leaf {
+              value {
+               str_value: "^10.*00$"
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kLike_match_by_start_and_end_of_str"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: NotEqual
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "node"
+            }
+          }
+          operator: kNE
+          rhs {
+            leaf {
+              value {
+               str_value: "node_1"
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_not_equal"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: LessThanEqual
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "cpu_usage"
+            }
+          }
+          operator: kLE
+          rhs {
+            leaf {
+              value {
+               int64_value: 60
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_less_than_equal"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+
+#==============================================================================
+
+# Category: Queries - Where Clause
+# Example: GreaterThan
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "cpu_usage"
+            }
+          }
+          operator: kGT
+          rhs {
+            leaf {
+              value {
+               int64_value: 60
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_greater_than"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Group Limit
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+   query {
+    entity_list {
+      entity_type_name: "vm"
+    }
+    group_by {
+      group_by_column: "hypervisor_cpu_usage_ppm"
+      group_by_column_type: kContinuous
+      group_sort_order {
+        sort_column: "hypervisor_cpu_usage_ppm"
+      }
+      raw_sort_order {
+        sort_column: "num_vcpus"
+      }
+      raw_columns {
+        column: "num_vcpus"
+      }
+      group_limit {
+        limit: 10
+        offset: 0
+      }
+      raw_limit {
+        limit: 2
+        offset: 10
+      }
+      num_buckets: 4
+      bucket_boundary: 150
+    }
+    query_name: "group_and_raw_limit_and_offset"
+   }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Raw limit Queries
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+ query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_limit {
+            limit: 2
+            offset: 4
+        }
+      }
+      query_name: "limit_and_offset"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Group By
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+ query {
+    entity_list {
+        entity_type_name: "vm" 
+        
+    }
+    group_by {
+        group_by_column: "cluster"
+        raw_columns { 
+            column: "_created_timestamp_usecs_" 
+            
+        }
+        raw_sort_order {
+            sort_column: "_created_timestamp_usecs_" 
+            sort_order: kDescending 
+            
+        }
+        raw_limit {
+            limit: 10 
+            offset: 0 
+            
+        }
+    } 
+    query_name: "prism:alert_group"
+}
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Downsampling
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "num_io"
+        }
+        down_sampling_interval_secs: 300
+      }
+      query_name: "downsampling_interval"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Group Sort
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+   query {
+    entity_list {
+      entity_type_name: "vm"
+    }
+    group_by {
+      group_by_column: "hypervisor_cpu_usage_ppm"
+      group_by_column_type: kContinuous
+      aggregate_columns {
+        column: "memory_usage_bytes"
+        operator: kCount
+      }
+      group_sort_order {
+        sort_column: "hypervisor_cpu_usage_ppm"
+        sort_order: kAscending
+      }
+      bucket_interval_separators {
+        int64_value: 1
+      }
+      bucket_interval_separators {
+        int64_value: 2
+      }
+      bucket_interval_separators {
+        int64_value: 3
+      }
+    }
+    query_name: "group_sort"
+   }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Entity Specific Query
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+        entity_id: "3cec611e-106b-4d1f-bc4a-883337ba3dcb"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      query_name: "entity_specific_query"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Time Range Queries
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+    query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "controller.read_source_oplog_bytes"
+        }
+      }
+      start_time_usecs: 1571702400000000
+      end_time_usecs:   1571702400020000
+      query_name: "time_range_queries"
+    }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Lookup Query
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+  query {
+    entity_list { entity_type_name: "vm" }
+    group_by {
+      raw_sort_order {
+        sort_column: "cpu_usage"
+        sort_order: kDescending
+      }
+      raw_limit { limit: 100 }
+      raw_columns { column: "_entity_id_" }  # implementation needs it
+      raw_columns { column: "cluster" }  # implementation needs it
+      raw_columns { column: "name" }
+      raw_columns { column: "cpu_usage" }
+
+      lookup_query {
+        entity_list { entity_type_name: "alert" }
+        group_by {
+          raw_limit { limit: 5 }
+          raw_columns { column: "title" }
+          raw_columns { column: "default_message" }
+        }
+        where_clause {
+          lhs { comparison_expr {
+            lhs { leaf { column: "vm" } }  # lookup column in inner query
+            operator: kEQ
+            rhs { leaf { column: "_entity_id_" } }  # lookup column in outer query
+          } }
+          operator: kAnd
+          rhs {comparison_expr {
+            lhs { leaf { column: "resolved" } }
+            operator: kEQ
+            rhs { leaf { value { bool_value: false } } }
+          } }
+        }
+      }
+
+      lookup_query {
+        entity_list { entity_type_name: "cluster" }
+        group_by {
+          raw_columns { column: "name" }
+        }
+        where_clause {
+          comparison_expr {
+            lhs { leaf { column: "_entity_id_" } }  # lookup column in inner query
+            operator: kEQ
+            rhs { leaf { column: "cluster" } }  # lookup column in outer query
+          }
+        }
+      }
+    }
+  }
+  `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Aggregate Columns
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+   query {
+    entity_list {
+      entity_type_name: "vm" 
+    }
+    group_by {
+      group_by_column: "vm_name"
+      raw_columns { 
+        column: "_created_timestamp_usecs_" 
+      }
+      aggregate_columns {
+        column: "memory_usage_bytes"
+        operator: kAvg
+      }
+      raw_sort_order {
+        sort_column: "_created_timestamp_usecs_" 
+        sort_order: kDescending 
+      }
+      raw_limit {
+        limit: 10 
+        offset: 0 
+      }
+    } 
+    query_name: "aggregation"
+   }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Continuous Grouping
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+   query {
+    entity_list {
+      entity_type_name: "vm" 
+    }
+    group_by {
+      group_by_column: "memory_usage_bytes"
+      group_by_column_type: kContinuous
+      group_sort_order {
+        sort_column: "memory_usage_bytes"
+      }
+      raw_limit {
+        limit: 10 
+        offset: 0 
+      }
+      num_buckets: 3
+      bucket_boundary: 70
+    } 
+    query_name: "continous_grouping"
+   }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Raw Sort
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+	"github.com/golang/protobuf/proto"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+ query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+        raw_sort_order {
+          sort_column: "vm_name"
+          sort_order: kAscending
+        }
+      }
+      query_name: "fetching_raw_columns_and_sorting"
+    }
+  `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Entity Count
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+	"github.com/golang/protobuf/proto"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+	 query {
+	   entity_list {
+		 entity_type_name: "vm"
+	   }
+	   flags: 2
+	   query_name: "entity_count_query"
+	 }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Having Clause Group By
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+		query {
+			entity_list {
+					entity_type_name: "vm" 
+			}
+			group_by {
+					group_by_column: "cluster"
+					having_clause {
+						comparison_expr {
+							lhs {
+								leaf {
+									column : "cluster"
+								}
+							}
+							operator: kContains
+							rhs {
+								leaf {
+									value {
+										str_list {
+											value_list: "UUID-0"
+										}
+									}
+								}
+							}
+						}
+					}
+			} 
+			query_name: "having_clause_group_by_query"
+	}
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Multi Dimensional Grouping
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+          entity_list {
+            entity_type_name: "vm"
+          }
+          group_by {
+            group_by_column: "memory_size_bytes"
+            sub_group_by {
+              group_by_column: "ip_addresses"
+              raw_columns {
+                column: "memory_size_bytes"
+              }
+              raw_columns {
+                column: "ip_addresses"
+              }
+            }
+          }
+        }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Ancestor Join Query
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+    query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        group_by_column: "cluster"
+        aggregate_columns {
+          column: "node"
+          ancestor_entity_type: "cluster"
+		}
+		suppress_ancestor_tree_traversal: false
+	  }
+      query_name: "ancestor_join_query"
+    }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Fetching Raw Columns
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      query_name: "fetching_raw_columns"
+    }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+      fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Shard Ids
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+    query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      shard_id_list: "10"
+      shard_id_list: "89"
+      shard_id_list: "107"
+      shard_id_list: "55"
+      shard_id_list: "100"
+      shard_id_list: "47"
+      shard_id_list: "7"
+      shard_id_list: "3"
+      query_name: "shard_ids"
+    }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Queries
+# Example: Grouping With Bucket Interval Separators
+#------------------------------------------------------------------------------
+package main
+
+import (
+	"flag"
+	"fmt"
+
+	"github.com/golang/protobuf/proto"
+	insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+	service *insights_interface.InsightsService
+)
+
+func main() {
+
+	flag.Parse()
+
+	// Creating New Service
+	service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+	arg := &insights_interface.GetEntitiesWithMetricsArg{}
+	response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+	query := `
+    query {
+      entity_list {
+        entity_type_name: "vm" 
+      }
+      group_by {
+        group_by_column: "hypervisor_cpu_usage_ppm"
+        group_by_column_type: kContinuous
+        raw_columns {
+          column: "_entity_id_"
+        }
+        raw_sort_order {
+          sort_column: "_entity_id_"
+        }
+        bucket_interval_separators {
+          int64_value: 1
+        }
+        bucket_interval_separators {
+          int64_value: 2
+        }
+        bucket_interval_separators {
+          int64_value: 3
+        }
+        bucket_interval_separators {
+          int64_value: 4
+        }
+      }
+      query_name: "continous_grouping_with_bucket_intervals"
+    }
+   `
+	proto.UnmarshalText(query, arg)
+
+	err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+		arg, response, nil, /* backoff */
+		60 /* timeoutSecs */)
+	if err != nil {
+		fmt.Println("Failed because of error - %s\n", err)
+	}
+	fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Where Clause Query
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service.
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+  
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+  
+  query := `
+  query {
+    entity_list {
+      entity_type_name: "vm_test"
+    }
+    where_clause {
+      comparison_expr {
+        lhs {
+          leaf {
+            column: "namespace_attr_1"
+            column_namespace: "np1"
+          }
+        }
+        operator: kEQ
+        rhs {
+          leaf {
+            value {
+              str_value: "attr_value_1" 
+            }
+          }
+        }
+      }
+    }
+    query_name: "where_clause"
+  }
+  `
+  proto.UnmarshalText(query, arg)
+  
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics" /* service */,
+                                    arg, response, nil /* backoff */,
+                                    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Group By Query
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service.
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+  query := `
+  query {
+    entity_list {
+    entity_type_name: "vm_test" 
+    }
+    group_by {
+      group_by_column: "namespace_attr_1"
+      group_by_column_namespace: "np1"
+    } 
+    query_name: "group_by"
+  }
+  `
+  proto.UnmarshalText(query, arg)
+
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+                                    arg, response, nil, /* backoff */
+                                    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Fetch Raw Columns Query
+#------------------------------------------------------------------------------
+package main
+
+import(
+  "flag"
+  insights_interface "github.com/nutanix-core/go-cache/insights/insights_interface"
+  "github.com/golang/protobuf/proto"
+)
+import "fmt"
+var(
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service.
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+  arg :=  &insights_interface.GetEntitiesWithMetricsArg{};
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+  query := `
+  query {
+    entity_list {
+      entity_type_name: "vm_test"
+    }
+    group_by {
+      raw_columns {
+      column: "namespace_attr_1"
+      column_namespace: "np1"
+      }
+    }
+    query_name: "fetching_raw_columns"
+  }
+  `
+  proto.UnmarshalText(query, arg)
+
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+                                    arg, response, nil, /* backoff */
+                                    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Aggregation Query
+#------------------------------------------------------------------------------
+package main
+
+import (
+  "flag"
+  "fmt"
+  "github.com/golang/protobuf/proto"
+  insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service.
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+  arg := &insights_interface.GetEntitiesWithMetricsArg{}
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+  query := `
+  query {
+    entity_list {
+      entity_type_name: "vm_test" 
+    }
+    group_by {
+      group_by_column: "namespace_attr_1"
+      group_by_column_namespace: "np1"
+      aggregate_columns {
+      column: "namespace_attr_2"
+      column_namespace: "np2"
+      operator: kAvg
+      }
+    } 
+    query_name: "aggregation"
+  }
+  `
+  proto.UnmarshalText(query, arg)
+
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+                                    arg, response, nil, /* backoff */
+                                    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Group Sort Query
+#------------------------------------------------------------------------------
+package main
+
+import (
+  "flag"
+  "fmt"
+  "github.com/golang/protobuf/proto"
+  insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service.
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+  arg := &insights_interface.GetEntitiesWithMetricsArg{}
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+  query := `
+  query {
+    entity_list {
+      entity_type_name: "vm_test"
+    }
+    group_by {
+      group_by_column: "namespace_attr_2"
+      group_by_column_namespace: "np2"
+      group_by_column_type: kDiscrete
+      group_sort_order {
+        sort_column: "namespace_attr_2"
+        sort_column_namespace: "np2"
+        sort_order: kAscending
+      }
+    }
+    query_name: "group_sort"
+  }
+  `
+  proto.UnmarshalText(query, arg)
+
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+                                    arg, response, nil, /* backoff */
+                                    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+
+# Category: Namespaces
+# Example: Lookup Query
+#------------------------------------------------------------------------------
+package main
+
+import (
+  "flag"
+  "fmt"
+  "github.com/golang/protobuf/proto"
+  insights_interface "github.com/nutanix-core/idf-interfaces/go/insights/insights_interface"
+)
+
+var (
+  service *insights_interface.InsightsService
+)
+
+func main() {
+
+  flag.Parse()
+
+  // Creating New Service
+  service = insights_interface.NewInsightsService("127.0.0.1", 2027)
+
+  arg := &insights_interface.GetEntitiesWithMetricsArg{}
+  response := &insights_interface.GetEntitiesWithMetricsRet{}
+
+  query := `
+  query {
+	entity_list { entity_type_name: "parent_etype"}
+	group_by {
+	  raw_columns {
+		column: "attr1_parent"
+		column_namespace: "ns1"
+	  }
+	  raw_columns {
+		column: "attr2_parent"
+	  }
+	  lookup_query {
+		entity_list { entity_type_name: "lookup_etype"}
+		group_by {
+		  raw_columns {
+			column: "attr1_lookup"
+			column_namespace: "ns2"
+		  }
+		  raw_columns {
+			column: "atrr2_lookup"
+		  }
+		}
+		where_clause {
+		  comparison_expr {
+			lhs {
+			  leaf {
+				column: "attr1_lookup"   
+				column_namespace: "ns2"
+			  }
+			}
+			operator: kEQ
+			rhs {
+			  leaf {
+				column: "attr1_parent"
+				column_namespace: "ns1"
+			  }
+			}
+		  }
+		}
+	  }
+	}
+  } 
+  `
+  proto.UnmarshalText(query, arg)
+
+  err := service.SendMsgWithTimeout("GetEntitiesWithMetrics", /* service */
+    arg, response, nil, /* backoff */
+    60 /* timeoutSecs */)
+  if err != nil {
+    fmt.Println("Failed because of error - %s\n", err)
+  }
+  fmt.Println(proto.MarshalTextString(response))
+}
+
+#==============================================================================
+

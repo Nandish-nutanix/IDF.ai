@@ -1,0 +1,57 @@
+# Model weights (too large for GitHub)
+*.safetensors
+*.gguf
+*.bin
+!requirements.txt
+
+# Fused/quantized model directories
+backend-server/phi4_idf_fused/
+backend-server/phi-4-4bit/
+backend-server/idf_query_fused/
+backend-server/idf_query_fused_old/
+backend-server/idf_query_fused_rl/
+
+# LoRA adapter checkpoints (large)
+backend-server/phi4_idf_adapter_v2/
+backend-server/phi4_idf_adapter_v3/
+backend-server/phi4_idf_adapter_v4/
+backend-server/idf_lora_adapter/
+backend-server/idf_lora_adapter_v2/
+backend-server/idf_grpo_adapter/
+
+# Keep final adapter config (small JSON) but ignore weights
+backend-server/phi4_idf_adapter_final/*.safetensors
+
+# Vector databases (regenerated from raw docs)
+backend-server/knowledge_base/chroma_db/
+vectordb/
+knowledge/schema/vectordb/
+
+# Raw documents (proprietary, not for GitHub)
+backend-server/knowledge_base/raw_docs/
+backend-server/knowledge_base/html_docs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.example
+
+# Logs
+*.log
+backend-server/finetune_log.txt
+backend-server/finetune_output.log
+backend-server/training_generation.log
+backend-server/mlx_server.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Cluster schema dumps (regenerated)
+backend-server/cluster_schemas/

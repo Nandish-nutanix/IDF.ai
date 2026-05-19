@@ -1,0 +1,595 @@
+{
+  "summary": {
+    "total": 50,
+    "passed": 44,
+    "failed": 6,
+    "errors": 0,
+    "accuracy_pct": 88.0,
+    "api_stats": {
+      "GetEntitiesWithMetrics": {
+        "pass": 44,
+        "fail": 6,
+        "error": 0,
+        "total": 50
+      }
+    },
+    "cat_stats": {
+      "basic_read": {
+        "pass": 42,
+        "fail": 6,
+        "error": 0,
+        "total": 48
+      },
+      "where_eq": {
+        "pass": 2,
+        "fail": 0,
+        "error": 0,
+        "total": 2
+      }
+    }
+  },
+  "results": [
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 14.684488296508789,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"vm\"\n  }\n}",
+      "id": "Q0001",
+      "query": "get all vm entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.966799974441528,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"vm\"\n  }\n}",
+      "id": "Q0002",
+      "query": "show all vms",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.957064390182495,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"node\"\n  }\n}",
+      "id": "Q0003",
+      "query": "get all node entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.8458991050720215,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"node\"\n  }\n}",
+      "id": "Q0004",
+      "query": "show all nodes",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.958176851272583,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"cluster\"\n  }\n}",
+      "id": "Q0005",
+      "query": "get all cluster entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.137327194213867,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"cluster\"\n  }\n  group_by {\n    raw_columns {\n      column: \"_entity_summary_\"\n    }\n    raw_columns {\n      column: \"_cluster_uuid_\"\n    }\n  }\n}",
+      "id": "Q0006",
+      "query": "show all clusters",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.923185110092163,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_disk\"\n  }\n}",
+      "id": "Q0007",
+      "query": "get all disk entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.983566045761108,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_disk\"\n  }\n}",
+      "id": "Q0008",
+      "query": "show all disks",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 7.9324140548706055,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"container\"\n  }\n}",
+      "id": "Q0009",
+      "query": "get all container entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'container'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 13.91028118133545,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"app_consistent_snapshot_metadata_chunk\"\n  }\n  entity_list {\n    entity_type_name: \"atlas_port_set\"\n  }\n  entity_list {\n    entity_type_name: \"category_co",
+      "id": "Q0010",
+      "query": "show all containers",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.79033088684082,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"volume_group_entity_capability\"\n  }\n}",
+      "id": "Q0011",
+      "query": "get all volume_group entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.946377992630005,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"volume_group_config\"\n  }\n}",
+      "id": "Q0012",
+      "query": "show all volume_groups",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.212749004364014,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"storage_pool\"\n  }\n}",
+      "id": "Q0013",
+      "query": "get all storage_pool entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.648613929748535,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"storage_pool\"\n  }\n}",
+      "id": "Q0014",
+      "query": "show all storage_pools",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 10.9909029006958,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"convert_protection_domain_report\"\n  }\n  entity_list {\n    entity_type_name: \"convert_protection_domain_stats\"\n  }\n  entity_list {\n    entity_type_name: \"",
+      "id": "Q0015",
+      "query": "get all protection_domain entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.247838973999023,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"protection_domain\"\n  }\n}",
+      "id": "Q0016",
+      "query": "show all protection_domains",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.146076917648315,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_disk\"\n  }\n}",
+      "id": "Q0017",
+      "query": "get all virtual_disk entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.170411825180054,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_disk\"\n  }\n}",
+      "id": "Q0018",
+      "query": "show all virtual_disks",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.20756483078003,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"entity_snapshot\"\n  }\n}",
+      "id": "Q0019",
+      "query": "get all snapshot entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 10.74773120880127,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"app_consistent_snapshot_metadata_chunk\"\n  }\n  entity_list {\n    entity_type_name: \"entity_snapshot\"\n  }\n  entity_list {\n    entity_type_name: \"file_serve",
+      "id": "Q0020",
+      "query": "show all snapshots",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 12.441023826599121,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_network\"\n  }\n  entity_list {\n    entity_type_name: \"host_nic\"\n  }\n  entity_list {\n    entity_type_name: \"network_flow_info\"\n  }\n  entity_list {\n ",
+      "id": "Q0021",
+      "query": "get all network entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.205840826034546,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_network\"\n  }\n}",
+      "id": "Q0022",
+      "query": "show all networks",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'subnet'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.241267919540405,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_network\"\n  }\n}",
+      "id": "Q0023",
+      "query": "get all subnet entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'subnet'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.394381046295166,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_network\"\n  }\n}",
+      "id": "Q0024",
+      "query": "show all subnets",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.688055992126465,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"lcm_image_v1\"\n  }\n}",
+      "id": "Q0025",
+      "query": "get all image entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.333773136138916,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"lcm_image_v1\"\n  }\n}",
+      "id": "Q0026",
+      "query": "show all images",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.107308626174927,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"category\"\n  }\n}",
+      "id": "Q0027",
+      "query": "get all category entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.148340940475464,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"category_association\"\n  }\n}",
+      "id": "Q0028",
+      "query": "show all categorys",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'project'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 12.597724914550781,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"abac_entity_capability\"\n  }\n  entity_list {\n    entity_type_name: \"alert\"\n  }\n  entity_list {\n    entity_type_name: \"category\"\n  }\n  entity_list {\n    en",
+      "id": "Q0029",
+      "query": "get all project entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'project'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 12.391151189804077,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"abac_entity_capability\"\n  }\n  entity_list {\n    entity_type_name: \"alert\"\n  }\n  entity_list {\n    entity_type_name: \"category\"\n  }\n  entity_list {\n    en",
+      "id": "Q0030",
+      "query": "show all projects",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "fail",
+      "issues": [
+        "proto missing 'ngt'"
+      ],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 13.1456458568573,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"category\"\n  }\n  entity_list {\n    entity_type_name: \"dormant_vm\"\n  }\n  entity_list {\n    entity_type_name: \"dormant_volume_group_entity_capability\"\n  }\n ",
+      "id": "Q0031",
+      "query": "get all ngt entities",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.209133863449097,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"ngts\"\n  }\n}",
+      "id": "Q0032",
+      "query": "show all ngts",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 13.847339868545532,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"node\"\n  }\n  group_by {\n    raw_columns {\n      column: \"_entity_summary_\"\n    }\n    lookup_query {\n      entity_list {\n        entity_type_name: \"cluster",
+      "id": "Q0033",
+      "query": "list all VMs on the cluster",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.043310165405273,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"vm\"\n  }\n}",
+      "id": "Q0034",
+      "query": "fetch all virtual machines",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.390474319458008,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"storage_vdisk\"\n  }\n}",
+      "id": "Q0035",
+      "query": "display all disks",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.69471001625061,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"node\"\n  }\n}",
+      "id": "Q0036",
+      "query": "retrieve all nodes",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.576889038085938,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"host_gpu\"\n  }\n}",
+      "id": "Q0037",
+      "query": "get all hosts in the system",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.239822149276733,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"storage_pool\"\n  }\n}",
+      "id": "Q0038",
+      "query": "show me all storage containers",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.595816135406494,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"volume_group_config\"\n  }\n}",
+      "id": "Q0039",
+      "query": "get all volume groups",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 10.6453378200531,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"convert_protection_domain_report\"\n  }\n  entity_list {\n    entity_type_name: \"convert_protection_domain_stats\"\n  }\n}",
+      "id": "Q0040",
+      "query": "list protection domains",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.629421710968018,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"entity_snapshot\"\n  }\n}",
+      "id": "Q0041",
+      "query": "show snapshots",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.316964864730835,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_nic\"\n  }\n}",
+      "id": "Q0042",
+      "query": "get all network interfaces",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.535956859588623,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"virtual_network\"\n  }\n}",
+      "id": "Q0043",
+      "query": "list all subnets",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 9.52852201461792,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"lcm_image_v1\"\n  }\n}",
+      "id": "Q0044",
+      "query": "show all images available",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.707576274871826,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"alert\"\n  }\n}",
+      "id": "Q0045",
+      "query": "get all alerts",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 11.296579837799072,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"event\"\n  }\n  group_by {\n    raw_columns {\n      column: \"_last_synced_timestamp_usecs_\"\n    }\n  }\n  cursor_query_info {\n    is_initial_cursor_query: true",
+      "id": "Q0046",
+      "query": "list recent events",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.737981796264648,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"task\"\n  }\n}",
+      "id": "Q0047",
+      "query": "show all tasks",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 8.383980989456177,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"abac_category\"\n  }\n}",
+      "id": "Q0048",
+      "query": "get all categories",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "basic_read"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 12.57475996017456,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"vm\"\n  }\n  group_by {\n    raw_columns {\n      column: \"vm_name\"\n    }\n  }\n  where_clause {\n    comparison_expr {\n      lhs {\n        leaf {\n          colu",
+      "id": "Q0049",
+      "query": "get VMs where power_state equals on",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "where_eq"
+    },
+    {
+      "status": "pass",
+      "issues": [],
+      "api_method": "GetEntitiesWithMetrics",
+      "elapsed": 12.638959884643555,
+      "proto_snippet": "query {\n  entity_list {\n    entity_type_name: \"vm\"\n  }\n  group_by {\n    raw_columns {\n      column: \"vm_name\"\n    }\n    raw_columns {\n      column: \"power_state\"\n    }\n  }\n  where_clause {\n    compari",
+      "id": "Q0050",
+      "query": "show VMs with power_state = off",
+      "expected_api": "GetEntitiesWithMetrics",
+      "category": "where_eq"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+[
+  {
+    "name": "kReturnErrorForUndefinedColumn",
+    "category": "Query Flags",
+    "type": "flags: 1 (0x1)",
+    "default": "off",
+    "description": "When set in the Query.flags field, the server returns an error if any column referenced in the query does not exist as a registered metric/attribute for the entity type. Without this flag, undefined columns are silently ignored. Set flags: 1 in your query to enable strict column validation.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 5 }\n  }\n  flags: 1\n  query_name: \"strict_column_validation\"\n}"
+  },
+  {
+    "name": "kSkipGuidsForEmptyRawColumns",
+    "category": "Query Flags",
+    "type": "flags: 2 (0x2)",
+    "default": "off",
+    "description": "Optimizes count-only queries by skipping entity GUID fetching when no raw_columns are needed. When you only need aggregate counts (kCount) in a group_by and don't need per-entity rows, set flags: 2 to reduce memory and improve performance.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    group_by_column: \"power_state\"\n    aggregate_columns {\n      column: \"vm_name\"\n      operator: kCount\n    }\n    group_limit { limit: 10 }\n  }\n  flags: 2\n  query_name: \"count_only_skip_guids\"\n}"
+  },
+  {
+    "name": "kForceMultiPhaseRawColumnFetch",
+    "category": "Query Flags",
+    "type": "flags: 4 (0x4)",
+    "default": "off",
+    "description": "Forces IDF to use a two-phase query strategy: first apply limit/sort to determine which entities match, then fetch the requested raw_columns only for those entities. This reduces memory when you have many columns but a small limit. Set flags: 4 to enable.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_sort_order {\n      sort_column: \"vm_name\"\n      sort_order: kAscending\n    }\n    raw_limit { limit: 5 }\n  }\n  flags: 4\n  query_name: \"multiphase_sorted_fetch\"\n}"
+  },
+  {
+    "name": "kFetchTotalUnfilteredEntityCount",
+    "category": "Query Flags",
+    "type": "flags: 16 (0x10)",
+    "default": "off",
+    "description": "Adds total_unfiltered_entity_count to the response, showing the total number of entities of that type BEFORE any where_clause filtering. Essential for building pagination UIs that show 'Showing 1-10 of 250 VMs'. Set flags: 16 in your query.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  where_clause {\n    comparison_expr {\n      lhs { leaf { column: \"power_state\" } }\n      operator: kEQ\n      rhs { leaf { value { str_value: \"on\" } } }\n    }\n  }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 10 }\n  }\n  flags: 16\n  query_name: \"filtered_with_total_count\"\n}"
+  },
+  {
+    "name": "kSortByShardIds",
+    "category": "Query Flags",
+    "type": "flags: 64 (0x40)",
+    "default": "off",
+    "description": "Sorts query results by their internal shard IDs instead of the default ordering. Useful for deterministic iteration across all shards in a distributed IDF deployment. Set flags: 64 in your query.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 10 }\n  }\n  flags: 64\n  query_name: \"sorted_by_shard_ids\"\n}"
+  },
+  {
+    "name": "kFetchTotalUnfilteredGroupCount",
+    "category": "Query Flags",
+    "type": "flags: 128 (0x80)",
+    "default": "off",
+    "description": "When using group_by queries, adds total_unfiltered_group_count to the response showing how many distinct groups exist before any having_clause or group_limit. Set flags: 128 to enable. Combine with kFetchTotalUnfilteredEntityCount (flags: 144 = 128+16) for both counts.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    group_by_column: \"power_state\"\n    aggregate_columns {\n      column: \"vm_name\"\n      operator: kCount\n    }\n    group_limit { limit: 10 }\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  flags: 128\n  query_name: \"group_count_query\"\n}"
+  },
+  {
+    "name": "cursor_query_info (custom_expiration_time_secs)",
+    "category": "Cursor / Pagination",
+    "type": "cursor_query_info field",
+    "default": "30s (server gflag: insights_cursor_query_objects_expiration_time_secs)",
+    "description": "Enables cursor-based pagination for large result sets. Set cursor_query_info.is_initial_cursor_query: true on the first call with a batch_size. The response returns next_cursor which you pass in subsequent calls. Use custom_expiration_time_secs to extend cursor lifetime beyond the default 30s (max controlled by insights_cursor_query_max_custom_expiration_time_secs = 120s).",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 10 }\n  }\n  cursor_query_info {\n    is_initial_cursor_query: true\n    batch_size: 5\n    custom_expiration_time_secs: 60\n  }\n  query_name: \"paginated_cursor_query\"\n}"
+  },
+  {
+    "name": "Combined Flags (kForceMultiPhase + kFetchTotalCount)",
+    "category": "Query Flags",
+    "type": "flags: 20 (0x4 + 0x10)",
+    "default": "off",
+    "description": "Flags can be combined by adding their values. flags: 20 = kForceMultiPhaseRawColumnFetch (4) + kFetchTotalUnfilteredEntityCount (16). This gives you both optimized multi-phase fetching AND the total entity count in one query.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_sort_order {\n      sort_column: \"vm_name\"\n      sort_order: kAscending\n    }\n    raw_limit { limit: 5 }\n  }\n  flags: 20\n  query_name: \"multiphase_with_total_count\"\n}"
+  },
+  {
+    "name": "kForceSinglePhaseFetchContinuousGrouping",
+    "category": "Query Flags",
+    "type": "flags: 8 (0x8)",
+    "default": "off",
+    "description": "When using continuous (time-bucket) grouping, IDF normally does a pre-fetch phase to find min/max values for bucket boundaries. Set flags: 8 to skip this pre-fetch and force single-phase execution — useful when you already know the bucket boundaries or want faster response at the cost of less optimal bucketing.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 10 }\n  }\n  flags: 8\n  query_name: \"single_phase_continuous\"\n}"
+  },
+  {
+    "name": "Query.priority",
+    "category": "Server Behavior",
+    "type": "int32 field on Query",
+    "default": "0 (highest)",
+    "description": "Sets the processing priority for this query in the server's RPC queue. Lower values = higher priority. When the server is under load (controlled by insights_max_rpc_queue_time_secs = 30s and insights_max_queued_rpc_ops = 25), higher-priority queries are processed first. Critical queries should use priority: 0.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 10 }\n  }\n  priority: 0\n  query_name: \"high_priority_query\"\n}"
+  },
+  {
+    "name": "raw_limit with offset",
+    "category": "Pagination",
+    "type": "QueryLimit fields: limit + offset",
+    "default": "offset: 0",
+    "description": "Simple offset-based pagination using raw_limit { limit: N offset: M }. Skips M entities and returns the next N. Simpler than cursor queries but less efficient for deep pagination. The server gflag insights_fetch_shard_data_entity_limit (default: 3000) caps the maximum entities per shard that can be processed.",
+    "api_method": "GetEntitiesWithMetrics",
+    "example_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_sort_order {\n      sort_column: \"vm_name\"\n      sort_order: kAscending\n    }\n    raw_limit { limit: 5 offset: 0 }\n  }\n  query_name: \"page_1_of_results\"\n}"
+  }
+]

@@ -1,0 +1,5842 @@
+[
+  {
+    "name": "insights_2027_query_filter_entity_types",
+    "category": "Query",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_2027_query_filter_query_names",
+    "category": "Query",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_2027_query_filter_source_svc_names",
+    "category": "Query",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_active_entities_info_request_suppress_time_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_active_entities_info_request_suppress_time_secs_for_backup",
+    "category": "Other",
+    "type": "int32",
+    "value": "1200",
+    "default": "1200",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_active_entities_info_ttl_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "21600",
+    "default": "21600",
+    "description": "TTL (seconds) for cached active entity information. After expiry, active entities info is recomputed. Default 21600 = 6 hours.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 100 }\n  }\n  query_name: \"active_entities_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_adjust_total_entity_size",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_allow_creates_in_high_mem_state",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_analytics_data_by_entity_column_family",
+    "category": "Other",
+    "type": "string",
+    "value": "analytics_data_by_entity",
+    "default": "analytics_data_by_entity",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_analytics_data_by_entity_ds_column_family",
+    "category": "Other",
+    "type": "string",
+    "value": "analytics_data_by_entity_ds",
+    "default": "analytics_data_by_entity_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_analytics_data_by_shard_column_family",
+    "category": "Sharding",
+    "type": "string",
+    "value": "analytics_data_by_shard",
+    "default": "analytics_data_by_shard",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_analytics_data_by_shard_ds_column_family",
+    "category": "Sharding",
+    "type": "string",
+    "value": "analytics_data_by_shard_ds",
+    "default": "analytics_data_by_shard_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_analytics_data_keyspace_name",
+    "category": "Other",
+    "type": "string",
+    "value": "insights_analytics_data",
+    "default": "insights_analytics_data",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_auto_delete_run_stats_count",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_auto_register",
+    "category": "Schema",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "Enables auto-registration of entity types and metrics from config files at startup. When true, IDF auto-registers schema without manual RPC calls.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"auto_registered_entity_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_auto_register_ignore_errors_base_attribute",
+    "category": "Schema",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_auto_register_metric_data_hourly_retention_in_weeks",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_auto_register_metric_data_raw_retention_in_weeks",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_auto_resolve_not_merged_state_delay_time_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "30000",
+    "default": "30000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_backup_entities_prefix",
+    "category": "Other",
+    "type": "string",
+    "value": "pc_backed_up_entities:",
+    "default": "pc_backed_up_entities:",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_backup_restore_replication_timeout_secs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "60",
+    "default": "60",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_entities_op_hourly_stat_buckets",
+    "category": "Query",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_entities_op_stat_window_sec",
+    "category": "Query",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_entities_op_stat_window_slots",
+    "category": "Query",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_metric_read_ops_during_snapshot_for_by_entity",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_metric_read_ops_during_snapshot_for_by_shard",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_batch_write_entity_ops_timeout_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_big_metric_data_db_column_size_in_bytes",
+    "category": "Retention",
+    "type": "int32",
+    "value": "50000",
+    "default": "50000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_bootstrap_cassandra_wait_time_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1800",
+    "default": "1800",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_bootstrap_delay_time_after_frequent_unclean_restarts_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "600",
+    "default": "600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_bootup_evictable_skip_computing_non_indexed_nested_fields",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_bootup_grab_uuid_set_lock_for_index_updates",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_by_shard_process_entities_of_interest",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_byom_data_by_entity_column_family",
+    "category": "Other",
+    "type": "string",
+    "value": "byom_data_by_entity",
+    "default": "byom_data_by_entity",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_byom_data_by_entity_ds_column_family",
+    "category": "Other",
+    "type": "string",
+    "value": "byom_data_by_entity_ds",
+    "default": "byom_data_by_entity_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_byom_data_by_shard_column_family",
+    "category": "Sharding",
+    "type": "string",
+    "value": "byom_data_by_shard",
+    "default": "byom_data_by_shard",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_byom_data_by_shard_ds_column_family",
+    "category": "Sharding",
+    "type": "string",
+    "value": "byom_data_by_shard_ds",
+    "default": "byom_data_by_shard_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_byom_data_keyspace_name",
+    "category": "Other",
+    "type": "string",
+    "value": "insights_byom_data",
+    "default": "insights_byom_data",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cache_eviction_max_time_us",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cache_num_shards",
+    "category": "Cache",
+    "type": "int32",
+    "value": "17",
+    "default": "4",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_calculate_entity_space_used_during_bootstrap",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_capture_rpc_counts",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_enable_multinode_ops",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_key_range_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "604800",
+    "default": "604800",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_multiple_ranges_scan_retry_count",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_op_col_family_stats_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_op_col_family_stats_window_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_op_drop_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_rangescan_retry_on_timeout",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_retry_intvl_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_shard_rescan_retry_ms",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "60000",
+    "default": "60000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cassandra_stat_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_chakr_scan_readahead_bytes",
+    "category": "Other",
+    "type": "int32",
+    "value": "262144",
+    "default": "262144",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_check_store_ready_retry_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_client_stats_cleanup_frequency_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_clock_skew_threshold_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cluster_function",
+    "category": "Other",
+    "type": "int32",
+    "value": "2",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_concurrent_metric_replay_num",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_configure",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_cursor_queries_enabled",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "Master switch for cursor-based paginated queries. When false, cursor_query_info in queries is ignored.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  cursor_query_info {\n    is_initial_cursor_query: true\n    batch_size: 5\n  }\n  query_name: \"cursor_enabled_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_cursor_query_max_custom_expiration_time_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "120",
+    "default": "120",
+    "description": "Maximum custom_expiration_time_secs a client can set for cursor queries. Requests exceeding this value are capped. Default 120s.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  cursor_query_info {\n    is_initial_cursor_query: true\n    batch_size: 5\n    custom_expiration_time_secs: 90\n  }\n  query_name: \"max_cursor_expiry_test\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_cursor_query_objects_expiration_time_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "How long (seconds) a cursor query object remains valid. After this, the cursor is purged and subsequent pagination calls fail. Default 30s.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  cursor_query_info {\n    is_initial_cursor_query: true\n    batch_size: 5\n    custom_expiration_time_secs: 25\n  }\n  query_name: \"cursor_affected_by_expiry\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_cursor_query_objects_purging_frequency_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_data_dir",
+    "category": "Other",
+    "type": "string",
+    "value": "/home/nutanix/data/insights",
+    "default": "/home/nutanix/data/insights",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_data_upgrade_batch_size_mb",
+    "category": "Query",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_data_upgrade_cleanup_delay_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "900",
+    "default": "900",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_data_upgrade_cleanup_periodic_interval_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_data_upgrade_state_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/data_upgrade_state",
+    "default": "/appliance/logical/insights/data_upgrade_state",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_db_updated_timestamps_store_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_db_updated_timestamps_store_window_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "600",
+    "default": "600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_default_auto_delete_periodicity_for_etype_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_delay_bootstrap_after_frequent_unclean_restarts",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_delay_dead_notification_interval_msecs",
+    "category": "Watch",
+    "type": "int32",
+    "value": "2500",
+    "default": "2500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_delay_metric_replay_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_delete_entity_stat_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_delete_entity_stat_window_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_deleted_entity_default_retention_in_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "60",
+    "default": "604800",
+    "description": "How long (seconds) a deleted entity is retained before permanent purge. Default 604800 = 7 days. Entities deleted via DeleteEntity remain queryable during this window.",
+    "affected_query_proto": "entity_guid {\n  entity_type_name: \"vm\"\n  entity_id: \"00000000-0000-0000-0000-000000000001\"\n}",
+    "api_method": "DeleteEntity"
+  },
+  {
+    "name": "insights_deleted_federated_entity_default_retention_in_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2592000",
+    "default": "2592000",
+    "description": "Retention for deleted federated entities. Default 2592000 = 30 days. Federated entities replicated from PC are kept longer for convergence.",
+    "affected_query_proto": "entity_guid {\n  entity_type_name: \"vm\"\n  entity_id: \"federated-vm-uuid\"\n}",
+    "api_method": "DeleteEntity"
+  },
+  {
+    "name": "insights_derived_metric_fill_missing_values",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_dimension_fact_entity_purge_interval_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_dirty_metric_forward_retry_cnt",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_auto_registration_of_entity_types",
+    "category": "Schema",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_cache_storage_for_low_priority_queries",
+    "category": "Cache",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_entity_trail_replication",
+    "category": "Replication",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_existing_lock_shard_for_nested_attr",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_gewm",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "Completely disables GetEntitiesWithMetrics RPC. When true, all GEWM queries are rejected. Used during maintenance.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"gewm_enabled_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_disable_metricdata_rpc",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "Globally disables MetricData RPC. When true, PutMetricData and GetMetricData are rejected. Individual metrics can override.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"metricdata_rpc_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_disable_orphan_entity_deletion_periodic_process",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_disable_sync_barrier_check",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_display_cassandra_column_value",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_display_entity_metric_count_on_profile_page",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_display_metric_ds_data_on_profile_page",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_display_replica_deleted_entities_info",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_display_replica_deleted_entity_ids",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_divergence_limit_for_total_entity_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "20",
+    "default": "20",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_dummy_update_retry_delay_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_active_entities_info_for_different_sharding",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_aggregate_memory_computation_for_entities",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_caching_empty_metric_data",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_case_insensitive_mongo_indices",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_case_insensitive_mongo_queries",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_cassandra_op_col_family_stats",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_cassandra_rescan",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_double_scan_during_bootstrap",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_evictable_entity_cache_count_collection",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_explicitly_node_forwarding",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_force_flush_on_sync_barrier",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_heavy_metric_sort",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "Allows sorting on non-indexed metric columns (requires full scan). Disabling prevents expensive sort operations.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_sort_order {\n      sort_column: \"vm_name\"\n      sort_order: kDescending\n    }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"heavy_sort_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_enable_large_objects",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_memory_usage_logging",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metric_data_compression",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metric_data_path_logs",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metric_data_profile",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metric_data_purge_log",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metric_snapshot_logs",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_metrics_on_chakrdb",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_non_indexed_filter_query_stats",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_paxos_batch_mutate_stats_collection",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_pmd_sample_count_collection",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_put_attribute_as_metric",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_query_profile_capture",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_query_statistics",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_query_statistics_log",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_save_protobuf_attribute_as_metric",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_self_monitoring",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_enable_watch_processing",
+    "category": "Watch",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "Master switch for watch processing. When false, RegisterWatch and all watch RPCs are disabled.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"watch_candidate_entities\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_enforce_rss_limits_by_share_mb",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entities_column_family_name",
+    "category": "Other",
+    "type": "string",
+    "value": "latest_entities",
+    "default": "latest_entities",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entities_column_name",
+    "category": "Other",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_auto_delete_process_schedule_interval_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "900",
+    "default": "900",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_metric_config",
+    "category": "Schema",
+    "type": "string",
+    "value": "/home/nutanix/config/insights/entity_attribute_config.proto",
+    "default": "/home/nutanix/config/insights/entity_attribute_config.proto",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_num_shards",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "128",
+    "default": "128",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_snapshot_boundary_buffer_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "60",
+    "default": "60",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_snapshot_compression_type",
+    "category": "Other",
+    "type": "string",
+    "value": "zlib",
+    "default": "zlib",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_timestamps_no_older_than_server_time_in_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "15552000",
+    "default": "15552000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_tombstone_purging_process_schedule_interval_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "300",
+    "default": "604800",
+    "description": "How frequently (seconds) the tombstone purging process runs. Even if retention expires, entities aren't purged until this process runs. Default 604800 = 7 days.",
+    "affected_query_proto": "entity_guid {\n  entity_type_name: \"vm\"\n  entity_id: \"stale-entity-uuid\"\n}",
+    "api_method": "DeleteEntity"
+  },
+  {
+    "name": "insights_entity_trail_cassandra_key_range_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_trail_column_family_name",
+    "category": "Other",
+    "type": "string",
+    "value": "entity_trail",
+    "default": "entity_trail",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_trail_row_compress_threshold_bytes",
+    "category": "Other",
+    "type": "int32",
+    "value": "102400",
+    "default": "102400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_trail_rows_to_read_on_bootstrapping",
+    "category": "Other",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_trail_snapshot_history_column_family_name",
+    "category": "Other",
+    "type": "string",
+    "value": "entity_trail_snapshot_history",
+    "default": "entity_trail_snapshot_history",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_type_config",
+    "category": "Schema",
+    "type": "string",
+    "value": "/home/nutanix/config/insights/entity_type_config.proto",
+    "default": "/home/nutanix/config/insights/entity_type_config.proto",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_type_whilelist_for_creates_in_high_mem",
+    "category": "Schema",
+    "type": "string",
+    "value": "mercury_authn_cookie_info,cluster_data_state,cluster,node,task,alert,api_lock,event,audit,remote_connection",
+    "default": "mercury_authn_cookie_info,cluster_data_state,cluster,node,task,alert,api_lock,event,audit,remote_connection",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_types_column_family_name",
+    "category": "Schema",
+    "type": "string",
+    "value": "registered_entity_types",
+    "default": "registered_entity_types",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_entity_types_proto_column_name",
+    "category": "Schema",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_error_out_deletion_of_entities_if_not_present_in_cache",
+    "category": "Cache",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_evaluate_user_defined_grouping_at_processor",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_evict_metric_objects_after_flush",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_add_rpc_delay_usecs",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_allow_add_new_attr_as_index_by_rpc",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_allow_change_evictability_and_index_column",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_allow_create_and_update_with_empty_entity_id",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_allow_mdata_ops_on_derived_metrics",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_block_entity_modification",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_bypass_data_upgrade",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_clear_response",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_compute_only_space_used_by_entities",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_concurrent_autoregistration_sleep_time_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_concurrent_replication_sleep_time_secs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_create_trail_for_replica",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_data_upgrade_error_injection",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_dehydrate_not_merged",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_delay_data_upgrade_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_delay_in_schema_propagation_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_delay_in_second_phase_scan_time_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_delay_read_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_disable_auto_index_etype_attrs",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_disable_pruning_on_low_watermark_exceed",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_disable_store_downsampled_values_in_query",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_federated_entity_types",
+    "category": "Replication",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_federation",
+    "category": "Replication",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_mongodb_data_upgrade",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_profile_entity_tree_walkup",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_scaleout",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_enable_uuid_metric_row_key",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_evict_evictable_entity",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "Forces immediate eviction of evictable entities from cache. Testing-only flag for eviction behavior.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"evictable_entity_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_experimental_fail_replication_for_entity_ids",
+    "category": "Replication",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_fatal_if_insights_id_not_present",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_clear_new_entity_object_after_error",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_dummy_update_for_db_sync",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_read_unevictable_cache",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_read_write_format",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_set_pmd_forwarded_flag",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_force_update_metric_data_upgrade_info",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_forced_ip",
+    "category": "Experimental",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_get_entities_do_not_copy",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_get_metric_data_fetch_attr_value_at_start",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_hold_cassandra_rescan",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_lattice_config_json_path",
+    "category": "Experimental",
+    "type": "string",
+    "value": "/home/nutanix/config/insights/federation_config.json",
+    "default": "/home/nutanix/config/insights/federation_config.json",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_load_replicated_entities_for_load_entity_trail",
+    "category": "Replication",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_log_metric_data_db_deletion",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_max_downsampling_interval_to_override_num_sampling_intervals",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_metric_term_id_test",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_mock_high_memory_state",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_mongo_replica_hosts",
+    "category": "Experimental",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_multiphase_query_sleep_time_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_no_fatal_exceeding_rss_limit",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_num_sampling_intervals_to_look_back_for_latest_queries",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_purge_deleted_entities_timestamp_sec",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_read_lattice_config_from_json",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_remove_entity_from_cache_before_update",
+    "category": "Cache",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_replicate_metric_data",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_return_derived_rollup_metric_error",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_return_invalid_entity_type_error",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_rpc_recording_enabled",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_shard_assignment_test",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_shard_not_loaded",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_column_value_corruption",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_hourly_ttl_in_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_paxos_update_error",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_raw_ttl_in_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_read_column_timeout",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_success_for_updates",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_timeout",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_timeout_count",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_cassandra_timeout_without_writing",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_concurrent_autoregistration",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_concurrent_replication_update",
+    "category": "Replication",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_concurrent_update",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_db_read_timeout_in_metric_upgrade_info_reads",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_db_timeout_after_write_in_metric_upgrade_info_updates",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_delete_shard_backend_scan_delay",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_entity_data_migrate_failure",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_entity_snapshot_patch_failure",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_metric_upgrade_info_missing",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_no_write_db_timeout_in_metric_upgrade_info_updates",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_rescan_deletion_race_sleep_secs",
+    "category": "Experimental",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_rescan_deletion_race_with_id",
+    "category": "Experimental",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_simulate_update_in_progress",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_skip_loading_entity_with_entity_id",
+    "category": "Experimental",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_skip_metric_data_snapshot",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_skip_metric_write",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_unit_tests",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_by_entity_test_column_family",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_forced_ip",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_http_rpc_client",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_mongo_as_backend",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_mongo_as_metric_backend",
+    "category": "Experimental",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_use_rpc_server_v2_for_lattice_rpcs",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_experimental_watchdog_status",
+    "category": "Watch",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_fatal_on_unsupported_chakrdb_column_family",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_flags_record_proto_bson_conversion_time",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_force_entity_trail_disabled",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_force_metadata_registration",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_forward_data_to_backup_uploader",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_get_entities_stat_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_get_entities_stat_window_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_global_data_stage_info_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/global_data_stage_info",
+    "default": "/appliance/logical/insights/global_data_stage_info",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_heartbeat_to_nusights_max_retries",
+    "category": "Nusights",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_high_memory_state_log_interval_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "30000",
+    "default": "30000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_high_memory_usage_rpc_throttling",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "Enable throttling when server memory usage is high. When true and memory exceeds threshold, low-priority RPCs are rejected.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  priority: 0\n  query_name: \"throttle_bypass_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_high_memory_usage_rpc_throttling_pct",
+    "category": "Retention",
+    "type": "int32",
+    "value": "90",
+    "default": "90",
+    "description": "Memory usage percentage threshold for triggering RPC throttling. Default 90%.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"memory_threshold_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_high_num_outstanding_ops_rpc_throttling",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "Enable throttling when too many outstanding ops. When true and queues are full, new RPCs are rejected.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  priority: 0\n  query_name: \"ops_throttle_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_ifc_max_retries",
+    "category": "Other",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_ifc_retry_wait_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_include_non_replicated_etypes_in_active_entities",
+    "category": "Replication",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_keyspace_name",
+    "category": "Other",
+    "type": "string",
+    "value": "insights",
+    "default": "insights",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_bucket_prefix",
+    "category": "Other",
+    "type": "string",
+    "value": "idf-lo-",
+    "default": "idf-lo-",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_cleanup_frequency_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_delete_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_enable_cleanup",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_iam_service_account_name",
+    "category": "Other",
+    "type": "string",
+    "value": "idf_lo_service_account",
+    "default": "idf_lo_service_account",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_query_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_large_object_retention_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_application_rpc_svc_epoll_threads",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_application_rpc_svc_server_ip",
+    "category": "Throttling",
+    "type": "string",
+    "value": "127.0.0.1",
+    "default": "127.0.0.1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_application_rpc_svc_server_port",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "6820",
+    "default": "6820",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_client_grpc_event_handler_threads",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_client_thread_pool_size",
+    "category": "Lattice",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lattice_delete_shard_node_rpc_timeout_secs",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_leader_metadata_sync_verify_interval_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_leader_metadata_sync_verify_max_retry",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_leader_not_init_log_every_n",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_load_entities_from_cassandra_on_new_etype_registration",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_load_entity_trail_memory_limit_mb",
+    "category": "Query",
+    "type": "int32",
+    "value": "8",
+    "default": "8",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_load_entity_trail_num_entities_limit",
+    "category": "Query",
+    "type": "int32",
+    "value": "3000",
+    "default": "3000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_load_registered_cluster_entities",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lock_name",
+    "category": "Other",
+    "type": "string",
+    "value": "insights",
+    "default": "insights",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_cache_prune_info",
+    "category": "Cache",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_coordinator_query_profile",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_epoch_interval_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1800",
+    "default": "1800",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_fqdn_to_ip_mapping_interval_usecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "300000000",
+    "default": "300000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_gewm_query_ret",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_long_running_queries_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "15",
+    "default": "15",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_perpetual_rpcs",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_remote_transfer_data_request",
+    "category": "Replication",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_log_rpc_request_id_exceeding_rpc_limit",
+    "category": "Query",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_long_running_ops_latency_threshold_usecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000000",
+    "default": "1000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_lookup_query_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "512",
+    "default": "512",
+    "description": "Batch size for internal lookup operations during query processing. Larger = more throughput but more memory. Default 512.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 100 }\n  }\n  query_name: \"large_lookup_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_lopc_tenant_id_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/pc_environment/config",
+    "default": "/appliance/logical/pc_environment/config",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_attempts_for_mongo_secondary_state_check",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_attempts_for_replica_set_expansion",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_batch_size_for_by_entity_read_request",
+    "category": "Query",
+    "type": "int32",
+    "value": "3494400",
+    "default": "3494400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_clock_drift_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "5000",
+    "default": "5000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_concurrent_entity_batch_updates",
+    "category": "Query",
+    "type": "int32",
+    "value": "25",
+    "default": "25",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_concurrent_metric_data_by_shard_cache_lookup",
+    "category": "Retention",
+    "type": "int32",
+    "value": "6",
+    "default": "6",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_concurrent_metric_reads_for_by_entity",
+    "category": "Other",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_concurrent_metric_reads_for_by_shard",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "128",
+    "default": "128",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_concurrent_replicate_entity",
+    "category": "Replication",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_continuous_rss_violations_allowed",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_delay_between_checks_for_secondary_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_entities_in_get_entities_rpc_for_low_memory_queue",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_entities_in_gewm_rpc_for_low_memory_queue",
+    "category": "Query",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_entities_num_in_batch_update",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "Max entities in a single batch update RPC. Split larger batches. Default 1000.",
+    "affected_query_proto": "entity_guid {\n  entity_type_name: \"vm\"\n  entity_id: \"test-batch-update-uuid\"\n}\nattribute_data_arg_list {\n  attribute_data {\n    name: \"vm_name\"\n    value { str_value: \"batch-updated-vm\" }\n  }\n}",
+    "api_method": "UpdateEntity"
+  },
+  {
+    "name": "insights_max_entities_per_batch_del",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "Max entities deletable in one batch. Larger batches must be split. Default 50.",
+    "affected_query_proto": "entity_guid {\n  entity_type_name: \"vm\"\n  entity_id: \"00000000-0000-0000-0000-000000000001\"\n}",
+    "api_method": "DeleteEntity"
+  },
+  {
+    "name": "insights_max_entities_per_batch_update_timestamp",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_fired_watches_per_client",
+    "category": "Watch",
+    "type": "int32",
+    "value": "100000",
+    "default": "100000",
+    "description": "Maximum fired watches a single client can accumulate. Older notifications may be dropped if exceeded. Default 100000.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"watch_target_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_fired_watches_per_long_poll",
+    "category": "Watch",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "Max fired watches returned per long-poll. Client must issue another poll for remaining. Default 500.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"long_poll_batch_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_hi_pri_metric_data_fetching_threads",
+    "category": "Retention",
+    "type": "int32",
+    "value": "6",
+    "default": "6",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_lookup_per_query",
+    "category": "Query",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_low_pri_metric_data_fetching_threads",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_missing_ranges_kept_per_shard",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_missing_ranges_sent_per_shard",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_num_of_running_rpc_ops_to_log",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_num_queries_in_batch_gewm",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "Maximum queries in a single BatchGetEntitiesWithMetrics RPC. Server rejects if exceeded. Default 50.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"batch_query_example\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_ops_queue_full_timestamp_usecs",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "300000000",
+    "default": "300000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_outstanding_cassandra_ops",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_outstanding_high_memory_rpc_ops",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "4",
+    "default": "1",
+    "description": "Max concurrent RPC ops in the high-memory queue. Very constrained (default 1) to prevent OOM for extremely large queries.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 100 }\n  }\n  query_name: \"high_memory_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_outstanding_low_memory_rpc_ops",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "32",
+    "default": "8",
+    "description": "Max concurrent RPC ops in the low-memory queue. Limits parallelism for memory-intensive operations. Default 8.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"power_state\" }\n    raw_limit { limit: 100 }\n  }\n  query_name: \"memory_intensive_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_outstanding_replication_local_rpc_ops",
+    "category": "Replication",
+    "type": "int32",
+    "value": "4",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_outstanding_replication_remote_rpc_ops",
+    "category": "Replication",
+    "type": "int32",
+    "value": "4",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_payload_bytes_per_scan",
+    "category": "Other",
+    "type": "int32",
+    "value": "1048576",
+    "default": "1048576",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_pending_auto_resolve_entities_count",
+    "category": "Other",
+    "type": "int32",
+    "value": "100000",
+    "default": "100000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_pending_migrate_ent_cnt",
+    "category": "Other",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_pending_purge_batches_cnt",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_pending_shard_unloads_secs",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_pending_updates_batches_cnt",
+    "category": "Query",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_query_profiling_intervals",
+    "category": "Query",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_queued_rpc_ops",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "25",
+    "default": "25",
+    "description": "Maximum RPC operations that can be queued. When full, new RPCs are rejected/throttled. Default 25.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  priority: 0\n  query_name: \"queue_capacity_test\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_raw_aggregate_cols_in_gewm_rpc_for_low_memory_queue",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_read_iterations_for_metric_sort",
+    "category": "Query",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_records_per_store_call",
+    "category": "Other",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_retries_for_dummy_updates",
+    "category": "Other",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_rpc_queue_time_secs",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "Maximum time (seconds) an RPC can sit in the queue before being dropped with kDroppedBecauseQueuedForTooLong. Default 30s.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  priority: 0\n  query_name: \"priority_queue_test\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_max_rpc_size_bytes",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "2097152",
+    "default": "2097152",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_max_time_secs_for_cache_storage",
+    "category": "Cache",
+    "type": "int32",
+    "value": "2073600",
+    "default": "2073600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_memory_allocator_pageheap_buffer_mb",
+    "category": "Other",
+    "type": "int32",
+    "value": "16",
+    "default": "16",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_count_stat_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_count_stat_window_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_bucket_holes_num_allowed",
+    "category": "Retention",
+    "type": "int32",
+    "value": "4",
+    "default": "4",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_cassandra_key_range_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "604800",
+    "default": "604800",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_entity",
+    "default": "metric_data_by_entity",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_column_request_max_time_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "259200",
+    "default": "259200",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_ds_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_entity_ds",
+    "default": "metric_data_by_entity_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_max_batch_write_rows",
+    "category": "Retention",
+    "type": "int32",
+    "value": "10000",
+    "default": "10000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_multi_key_retry_count",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_test_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_entity_test",
+    "default": "metric_data_by_entity_test",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_entity_test_ds_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_entity_test_ds",
+    "default": "metric_data_by_entity_test_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_cassandra_key_range_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_shard",
+    "default": "metric_data_by_shard",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_ds_column_family",
+    "category": "Retention",
+    "type": "string",
+    "value": "metric_data_by_shard_ds",
+    "default": "metric_data_by_shard_ds",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_max_concurrent_read",
+    "category": "Retention",
+    "type": "int32",
+    "value": "15",
+    "default": "15",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_multi_key_retry_count",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_by_shard_rows_read_cost_coefficient_percentage",
+    "category": "Retention",
+    "type": "int32",
+    "value": "200",
+    "default": "200",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_compression_threshold",
+    "category": "Retention",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_compression_type",
+    "category": "Retention",
+    "type": "string",
+    "value": "zlib",
+    "default": "zlib",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_flush_num_low_mem_watermark_multiple",
+    "category": "Retention",
+    "type": "double",
+    "value": "1.2",
+    "default": "1.2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_forwarding_retry_msecs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_hourly_retention_period_in_weeks",
+    "category": "Retention",
+    "type": "int32",
+    "value": "53",
+    "default": "53",
+    "description": "Default retention (weeks) for hourly downsampled metric data. Default 52 = 1 year. Override per-metric via hourly_retention_in_weeks.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  start_time_usecs: 1690000000000000\n  end_time_usecs: 1700000000000000\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 50 }\n  }\n  query_name: \"hourly_historical_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_metric_data_keyspace_name",
+    "category": "Retention",
+    "type": "string",
+    "value": "insights_metric_data",
+    "default": "insights_metric_data",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_min_hourly_ttl_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_min_raw_ttl_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_minimum_bucketization_interval_usecs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "1000000",
+    "default": "1000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_profile_query_regex",
+    "category": "Retention",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_purge_process_range_scan_row_count",
+    "category": "Retention",
+    "type": "int32",
+    "value": "10000",
+    "default": "10000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_purge_process_schedule_interval_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "604800",
+    "default": "604800",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_raw_retention_period_in_weeks",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "Default retention (weeks) for raw metric time-series data. After this period, raw data points are purged. Override per-metric via raw_retention_in_weeks in MetricTypeConfig.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  start_time_usecs: 1700000000000000\n  end_time_usecs: 1700086400000000\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"time_range_metrics\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_metric_data_read_consistency_level",
+    "category": "Retention",
+    "type": "string",
+    "value": "kOne",
+    "default": "kOne",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_real_time_metrics_time_offset_in_hours",
+    "category": "Retention",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_snapshot_executor_vec_size",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_snapshot_max_num_of_sets_in_catchup",
+    "category": "Retention",
+    "type": "int32",
+    "value": "20000",
+    "default": "20000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_snapshot_min_num_of_sets",
+    "category": "Retention",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_upgrade_info_proto_column_name",
+    "category": "Retention",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_write_consistency_level",
+    "category": "Retention",
+    "type": "string",
+    "value": "kQuorum",
+    "default": "kQuorum",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_write_to_cassandra_delay_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_write_to_cassandra_interval_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "15",
+    "default": "15",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_data_write_to_cassandra_time_buffer_seconds",
+    "category": "Retention",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_log_dir_name",
+    "category": "Other",
+    "type": "string",
+    "value": "metric_data_updates",
+    "default": "metric_data_updates",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_log_file_size_threshold",
+    "category": "Other",
+    "type": "int32",
+    "value": "20971520",
+    "default": "20971520",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_logging_enabled",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_replay_forwarding_retry_times",
+    "category": "Other",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_replay_retry_waiting_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_row_key_upgrade_delay_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_snapshot_sleep_value_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_types_column_family_name",
+    "category": "Other",
+    "type": "string",
+    "value": "registered_metric_types",
+    "default": "registered_metric_types",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_types_proto_column_name",
+    "category": "Other",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_metric_upgrade_info_write_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_continuous_success_scan_num",
+    "category": "Other",
+    "type": "int32",
+    "value": "4",
+    "default": "4",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_hrs_for_filtered_processing",
+    "category": "Query",
+    "type": "int32",
+    "value": "720",
+    "default": "720",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_num_by_shard_hours",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "1",
+    "default": "1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_num_by_shard_row_keys",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "128",
+    "default": "128",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_time_msecs_for_enforcing_query_timeout",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_min_worker_threads",
+    "category": "Other",
+    "type": "int32",
+    "value": "4",
+    "default": "4",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_admin_database_name",
+    "category": "Other",
+    "type": "string",
+    "value": "admin",
+    "default": "admin",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_entity_analytics_collection",
+    "category": "Other",
+    "type": "string",
+    "value": "_by_entity_analytics_stats",
+    "default": "_by_entity_analytics_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_entity_analytics_ds_collection",
+    "category": "Other",
+    "type": "string",
+    "value": "_by_entity_analytics_ds_stats",
+    "default": "_by_entity_analytics_ds_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_entity_collection",
+    "category": "Other",
+    "type": "string",
+    "value": "_by_entity_stats",
+    "default": "_by_entity_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_entity_ds_collection",
+    "category": "Other",
+    "type": "string",
+    "value": "_by_entity_ds_stats",
+    "default": "_by_entity_ds_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_shard_analytics_collection",
+    "category": "Sharding",
+    "type": "string",
+    "value": "_by_shard_analytics_stats",
+    "default": "_by_shard_analytics_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_shard_analytics_ds_collection",
+    "category": "Sharding",
+    "type": "string",
+    "value": "_by_shard_analytics_ds_stats",
+    "default": "_by_shard_analytics_ds_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_shard_collection",
+    "category": "Sharding",
+    "type": "string",
+    "value": "_by_shard_stats",
+    "default": "_by_shard_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_by_shard_ds_collection",
+    "category": "Sharding",
+    "type": "string",
+    "value": "_by_shard_ds_stats",
+    "default": "_by_shard_ds_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_collection_read_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_database_name",
+    "category": "Other",
+    "type": "string",
+    "value": "insights",
+    "default": "insights",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_entity_type_collection",
+    "category": "Schema",
+    "type": "string",
+    "value": "_entity_type",
+    "default": "_entity_type",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_evictable_entity_types",
+    "category": "Retention",
+    "type": "string",
+    "value": "alert,event,audit,action_rule_result,recovery_point,discovery_result",
+    "default": "alert,event,audit,action_rule_result,recovery_point,discovery_result",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_host",
+    "category": "Other",
+    "type": "string",
+    "value": "127.0.0.1",
+    "default": "127.0.0.1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_max_connection_pool",
+    "category": "Other",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_metric_type_collection",
+    "category": "Other",
+    "type": "string",
+    "value": "_metric_type",
+    "default": "_metric_type",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_min_connection_pool",
+    "category": "Other",
+    "type": "int32",
+    "value": "16",
+    "default": "16",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_port",
+    "category": "Other",
+    "type": "int32",
+    "value": "27018",
+    "default": "27018",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_replica_set_init_state_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/mongo_replica_set_state",
+    "default": "/appliance/logical/insights/mongo_replica_set_state",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_replica_set_name",
+    "category": "Other",
+    "type": "string",
+    "value": "IDFMongoReplset",
+    "default": "IDFMongoReplset",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_replica_set_url",
+    "category": "Other",
+    "type": "string",
+    "value": "mongodb://%1%/?replicaSet=%2%&amp;minPoolSize=%3%&amp;maxPoolSize=%4%",
+    "default": "mongodb://%1%/?replicaSet=%2%&amp;minPoolSize=%3%&amp;maxPoolSize=%4%",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_standalone_url",
+    "category": "Other",
+    "type": "string",
+    "value": "mongodb://%1%/",
+    "default": "mongodb://%1%/",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_mongo_store_skip_by_entity_stats",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_msecs_before_cassandra_shard_rescan",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "120000",
+    "default": "120000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nested_fields_use_one_parse_per_base_attr",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_no_operation_for_put_metric_data_rpc",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_node_map_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/node_map",
+    "default": "/appliance/logical/insights/node_map",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_non_indexed_filter_query_stats_window_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "18000",
+    "default": "18000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_non_indexed_filter_query_stats_window_slots",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_evictions_at_a_time",
+    "category": "Retention",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_intervals_for_metric_sort",
+    "category": "Query",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_long_running_queries",
+    "category": "Other",
+    "type": "int32",
+    "value": "20",
+    "default": "20",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_retries_for_timestamp_skew_fix",
+    "category": "Other",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_threads",
+    "category": "Other",
+    "type": "int32",
+    "value": "16",
+    "default": "16",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_threads_vcpu_factor",
+    "category": "Other",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_num_vcpus_check_timeout_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "60000",
+    "default": "60000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_disk_usage_profile_interval_seconds",
+    "category": "Nusights",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_disk_usage_table_name",
+    "category": "Nusights",
+    "type": "string",
+    "value": "idf_disk_usage_per_keyspace",
+    "default": "idf_disk_usage_per_keyspace",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_entity_counts_profile_interval_seconds",
+    "category": "Nusights",
+    "type": "int32",
+    "value": "86400",
+    "default": "86400",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_entity_counts_table_name",
+    "category": "Nusights",
+    "type": "string",
+    "value": "idf_entity_counts",
+    "default": "idf_entity_counts",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_pulse_enable",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_query_profile_interval_seconds",
+    "category": "Query",
+    "type": "int32",
+    "value": "900",
+    "default": "900",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_query_profile_latency_threshold_usecs",
+    "category": "Query",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_query_profile_table_name",
+    "category": "Query",
+    "type": "string",
+    "value": "idf_query_profiles",
+    "default": "idf_query_profiles",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_retry_rpc",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_rpc_stats_profile_interval_seconds",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_rpc_stats_table_name",
+    "category": "Throttling",
+    "type": "string",
+    "value": "idf_rpc_hourly_stats",
+    "default": "idf_rpc_hourly_stats",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_nusights_source_client_name",
+    "category": "Nusights",
+    "type": "string",
+    "value": "idf_container",
+    "default": "idf_container",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_obj_spinrwlock_pool_size",
+    "category": "Other",
+    "type": "int32",
+    "value": "65000",
+    "default": "256",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_object_lock_name_prefix",
+    "category": "Other",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_odin_init_retry_time_ms",
+    "category": "Other",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_orphan_entity_deletion_max_query_retries",
+    "category": "Query",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_orphan_entity_deletion_num_entities_per_batch",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_orphan_entity_deletion_process_schedule_interval_seconds",
+    "category": "Other",
+    "type": "int32",
+    "value": "3600",
+    "default": "3600",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_orphan_entity_deletion_run_stats_count",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_pct_threads_for_second_phase_during_bootstrap",
+    "category": "Other",
+    "type": "double",
+    "value": "0.75",
+    "default": "0.75",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_persist_unregistered_entities_during_restore",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_port",
+    "category": "Other",
+    "type": "int32",
+    "value": "2027",
+    "default": "2027",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_preserve_backup_info_on_successive_updates_after_restore",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_profile_mongo_metric_operation",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_profiling_capture_async_substage_max_node_count",
+    "category": "Other",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_proto_buffer_compression_limit",
+    "category": "Query",
+    "type": "int32",
+    "value": "60000000",
+    "default": "60000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_protobuf_fields_to_omit_in_log_output",
+    "category": "Other",
+    "type": "string",
+    "value": "shard_id_list",
+    "default": "shard_id_list",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_publish_disk_usage_to_nusights",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_publish_entity_counts_to_nusights",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_publish_heartbeat_to_nusights",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_publish_queries_to_nusights",
+    "category": "Nusights",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_publish_rpc_stats_to_nusights",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_count_unit_time",
+    "category": "Query",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_cursor_default_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_disallow_redundant_like_usage",
+    "category": "Query",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_enable_multiphase_fetch",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_enable_multiphase_fetch_for_continuous_grouping",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_force_rewrite_offset_limit",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_max_fetch_duration_from_present_in_usecs",
+    "category": "Query",
+    "type": "int32",
+    "value": "157680000000000",
+    "default": "157680000000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_max_values_for_kcorrelate",
+    "category": "Query",
+    "type": "int32",
+    "value": "2000000",
+    "default": "2000000",
+    "description": "Max total list values across entities for kCorrelate queries. Exceeding this returns kQueryCorrelateNumValuesLimitExceeded. Default 2000000.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  where_clause {\n    comparison_expr {\n      lhs { leaf { column: \"power_state\" } }\n      operator: kEQ\n      rhs { leaf { value { str_value: \"on\" } } }\n    }\n  }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"correlate_limit_query\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_query_multiphase_for_raw_columns_min_columns",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_multiphase_for_raw_columns_min_offset",
+    "category": "Query",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_name_to_max_concurrency_threshold",
+    "category": "Query",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_profile_max_entity_list_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_statistics_log_frequency",
+    "category": "Query",
+    "type": "int32",
+    "value": "30000000",
+    "default": "30000000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_stats_histogram_factor",
+    "category": "Query",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_stats_histogram_max_latency_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "60",
+    "default": "60",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_stats_window_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "18000",
+    "default": "18000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_query_stats_window_slots",
+    "category": "Query",
+    "type": "int32",
+    "value": "5",
+    "default": "5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_recent_unclean_restarts_threshold",
+    "category": "Other",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_register_entity_types_stat_window_sec",
+    "category": "Schema",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_register_entity_types_stat_window_slots",
+    "category": "Schema",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_clusters_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/physical/clusterexternalstate",
+    "default": "/appliance/physical/clusterexternalstate",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_flow_smsp_clusters_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/remote_endpoint/kflow_smsp",
+    "default": "/appliance/logical/insights/remote_endpoint/kflow_smsp",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_fsvm_clusters_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/physical/files_clusterexternalstate",
+    "default": "/appliance/physical/files_clusterexternalstate",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_pc_clusters_zk_node_path_for_smsp",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/remote_endpoint/kmulticluster",
+    "default": "/appliance/logical/insights/remote_endpoint/kmulticluster",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_pe_clusters_zk_node_path_for_smsp",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/remote_endpoint/kndfs",
+    "default": "/appliance/logical/insights/remote_endpoint/kndfs",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_registered_xi_clusters_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/xi_portal_external_state",
+    "default": "/appliance/logical/insights/xi_portal_external_state",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_relative_path_for_cassandra_metadata_disks",
+    "category": "Other",
+    "type": "string",
+    "value": "/metadata/cassandra/data/",
+    "default": "/metadata/cassandra/data/",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replica_deleted_entities_cache_num_shards",
+    "category": "Cache",
+    "type": "int32",
+    "value": "16",
+    "default": "16",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replication_check_missing_types_intvl_secs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replication_entity_retry_time_msecs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "20000",
+    "default": "20000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replication_state_batch_size",
+    "category": "Query",
+    "type": "int32",
+    "value": "30",
+    "default": "30",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replication_state_cassandra_flush_frequency_secs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "150",
+    "default": "15",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_replication_timeout_secs",
+    "category": "Replication",
+    "type": "int32",
+    "value": "60",
+    "default": "60",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_retry_delay_for_mongo_secondary_state_check_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "10000",
+    "default": "10000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_retry_delay_for_replica_set_expansion_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "10000",
+    "default": "10000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rolling_upgrade_finished_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/scaleout_rolling_upgrade_finished",
+    "default": "/appliance/logical/insights/scaleout_rolling_upgrade_finished",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_row_key_prefix_length_in_bytes",
+    "category": "Other",
+    "type": "int32",
+    "value": "8",
+    "default": "8",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rows_to_read_per_scan",
+    "category": "Other",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_arg_print_length",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "10000",
+    "default": "10000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_client_v2_large_message_threshold_bytes",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "134217728",
+    "default": "134217728",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_max_entity_list_size_for_logging",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_server_num_epoll_threads",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "4",
+    "default": "4",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_stat_window_sec",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rpc_stats_client_limit",
+    "category": "Query",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_check_frequency_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_display_detailed_info",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_high_watermark_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "90",
+    "default": "90",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_low_watermark_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "80",
+    "default": "75",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_metric_data_flushing_catchup_pct",
+    "category": "Retention",
+    "type": "int32",
+    "value": "82",
+    "default": "82",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_share_mb",
+    "category": "Other",
+    "type": "int32",
+    "value": "5500",
+    "default": "200",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_share_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_threshold_for_bytes_in_use_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "150",
+    "default": "150",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_rss_threshold_for_entity_size_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "60",
+    "default": "60",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_scan_only_expired_entity_types",
+    "category": "Schema",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_schedule_query_timeout_event",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_schema_v1_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/schema_v1",
+    "default": "/appliance/logical/insights/schema_v1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_second_phase_scan_retry_time_ms",
+    "category": "Other",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_send_non_syncable_entity_time_range_with_urgent_priority",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_serialize_rpc_ops",
+    "category": "Throttling",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_ip",
+    "category": "Other",
+    "type": "string",
+    "value": "127.0.0.1",
+    "default": "127.0.0.1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_jitter_time_values_mins",
+    "category": "Other",
+    "type": "int32",
+    "value": "55",
+    "default": "55",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_num_of_retry_watch_registration",
+    "category": "Watch",
+    "type": "int32",
+    "value": "3",
+    "default": "3",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_paxos_batch_mutate_stats_window_sec",
+    "category": "Query",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_paxos_batch_mutate_stats_window_slots",
+    "category": "Query",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_server_running_in_container",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_set_db_sync_timestamps",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_simulate_cassandra_read_timeout_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_simulate_concurrent_active_entities_delete_sleep_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "-1",
+    "default": "-1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_simulate_metric_flush_in_speed_mode",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_analytics_metrics_by_entity_column_family",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_analytics_metrics_by_shard_column_family",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_byom_metrics_by_entity_column_family",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_byom_metrics_by_shard_column_family",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_metric_data_caching",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_real_time_metrics_by_entity_column_family",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_real_time_metrics_by_shard_column_family",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_serializing_by_shard_metric_data_objects",
+    "category": "Retention",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_skip_shard_ids_from_lock_id_for_by_shard_reads",
+    "category": "Sharding",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_sleep_between_evictions_nsecs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_source_svc_name",
+    "category": "Other",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stamp_replicated_entities_with_sync_timestamp_metadata",
+    "category": "Replication",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stats_entities_per_page",
+    "category": "Other",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stats_hot_metric_threshold_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "900",
+    "default": "900",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stats_max_heavy_query_profiles",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stats_max_query_profiles",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_stats_max_spotlight_search_profiles",
+    "category": "Nusights",
+    "type": "int32",
+    "value": "500",
+    "default": "500",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_store_entities_in_replica_deleted_entities_map",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_store_mdata_object_sizes",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_store_test_metric_retention_now_based_secs",
+    "category": "Retention",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_sub_error_separator",
+    "category": "Other",
+    "type": "string",
+    "value": "@",
+    "default": "@",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_sync_barrier_queue_batcher_timeout_msecs",
+    "category": "Query",
+    "type": "int32",
+    "value": "50",
+    "default": "50",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_sync_barrier_queue_size_min_threshold_for_logging",
+    "category": "Throttling",
+    "type": "int32",
+    "value": "100",
+    "default": "100",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_sync_barrier_wait_retry_timeout_msecs",
+    "category": "Other",
+    "type": "int32",
+    "value": "1000",
+    "default": "1000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_tenant_aware",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_tenant_id_zk_node_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/xi_mgmt/config",
+    "default": "/appliance/logical/xi_mgmt/config",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_throttle_rpc_ops_under_rss_constraints",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_unit_test_state_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/unit_test_state",
+    "default": "/appliance/logical/insights/unit_test_state",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_unregister_stale_watch_clients_periodically",
+    "category": "Watch",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_update_entity_stat_window_sec",
+    "category": "Other",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_update_entity_stat_window_slots",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_upgrade_max_concurrent_shards",
+    "category": "Sharding",
+    "type": "int32",
+    "value": "2",
+    "default": "2",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_upgrade_version_path",
+    "category": "Other",
+    "type": "string",
+    "value": "/appliance/logical/insights/upgrade_version",
+    "default": "/appliance/logical/insights/upgrade_version",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_entity_type_name_to_vlog",
+    "category": "Schema",
+    "type": "string",
+    "value": "",
+    "default": "",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_flow_smsp_to_pe_port",
+    "category": "Other",
+    "type": "int32",
+    "value": "2351",
+    "default": "2351",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_ip",
+    "category": "Other",
+    "type": "string",
+    "value": "127.0.0.1",
+    "default": "127.0.0.1",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_pc_backup_port",
+    "category": "Other",
+    "type": "int32",
+    "value": "2349",
+    "default": "2349",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_port",
+    "category": "Other",
+    "type": "int32",
+    "value": "2029",
+    "default": "2029",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_uploader_running_in_container",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_cassandra_delete_for_metric_data_purge",
+    "category": "Retention",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_chakrdb_as_backend",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_indexes_for_unevic_indexed_sort",
+    "category": "Query",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_ip_instead_of_fqdn_for_zk_heartbeat",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_ip_instead_of_fqdn_for_zk_session_creation",
+    "category": "Other",
+    "type": "bool",
+    "value": "false",
+    "default": "false",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_new_cmp_operator_for_bytes",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_use_new_cmp_operator_for_strings",
+    "category": "Other",
+    "type": "bool",
+    "value": "true",
+    "default": "true",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_variable_int_array_capacity_increments",
+    "category": "Other",
+    "type": "int32",
+    "value": "16",
+    "default": "16",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_wait_time_on_current_batch_first_modified_time_usecs",
+    "category": "Query",
+    "type": "int32",
+    "value": "50000",
+    "default": "50000",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_watch_client_staleness_limit_secs",
+    "category": "Query",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "If a watch client hasn't polled for this many seconds, it's considered stale and auto-unregistered. Default 300 = 5 min.",
+    "affected_query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_limit { limit: 5 }\n  }\n  query_name: \"watch_staleness_check\"\n}",
+    "api_method": "GetEntitiesWithMetrics"
+  },
+  {
+    "name": "insights_watchdog_timeout_secs",
+    "category": "Watch",
+    "type": "int32",
+    "value": "300",
+    "default": "300",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_watches_heartbeat_rpc_timeout_factor",
+    "category": "Watch",
+    "type": "double",
+    "value": "0.5",
+    "default": "0.5",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_xi_ct_rss_share_mb",
+    "category": "Other",
+    "type": "int32",
+    "value": "3584",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_xi_ct_rss_share_pct",
+    "category": "Other",
+    "type": "int32",
+    "value": "0",
+    "default": "0",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  },
+  {
+    "name": "insights_zeus_config_degraded_node_poll_interval_secs",
+    "category": "Other",
+    "type": "int32",
+    "value": "10",
+    "default": "10",
+    "description": "",
+    "affected_query_proto": "",
+    "api_method": ""
+  }
+]

@@ -1,0 +1,1281 @@
+// Extracted from insights_interface.proto for LLM context.
+// Contains the Query message and all dependent types (full structure + comments).
+// This file is not intended to compile standalone; it references package
+// nutanix.insights.interface and types from the original proto.
+
+syntax = "proto2";
+
+package nutanix.insights.interface;
+
+// ---------------------------------------------------------------------------
+// Query-related error SubType enum entries (from InsightsErrorProto.SubType)
+// ---------------------------------------------------------------------------
+//    // message GetEntitiesWithMetricsArg errors.
+//    // Missing query arg.
+//    kGetEntitiesWithMetricsArgMissingQuery   = 1000;
+//
+//    // message Query errors.
+//    // Missing entity name.
+//    kQueryMissingEntityName                  = 2000;
+//    // Different entity types.
+//    kQueryInvalidEntityType                  = 2001;
+//    // Duplicate entity ids.
+//    kQueryDuplicateEntityId                  = 2002;
+//    // Mixed wildcard and non wildcard entities.
+//    kQueryInvalidEntityWildcard              = 2003;
+//    // start time < 0.
+//    kQueryInvalidStartTime                   = 2004;
+//    // end time < start time.
+//    kQueryInvalidEndTime                     = 2005;
+//    // Where clause expression is too deep.
+//    kQueryWhereClauseIsTooDeep               = 2006;
+//    // Data integrity check on relationship tree failed.
+//    kQueryRelationshipTreeCheckFailed        = 2007;
+//    // Unsupported.
+//    kQueryUnsupported                        = 2008;
+//    // Invalid shard id.
+//    kQueryInvalidShardId                     = 2009;
+//    // Missing Entity.
+//    kQueryMissingEntity                      = 2010;
+//    // Too many evictable entities after filtering.
+//    kQueryExceedsEvictableEntityLimit        = 2011;
+//    // Regex in conditional expression is too long.
+//    kRegexTooLong                            = 2012;
+//    // kCorrelate num value limit exceeds.
+//    kQueryCorrelateNumValuesLimitExceeded    = 2013;
+//
+//    // message QueryGroupBy errors.
+//    kQueryGroupByInvalidRawSort              = 3000;
+//    kQueryGroupByInvalidRawLimit             = 3001;
+//    kQueryGroupByMissingRawCol               = 3002;
+//    kQueryGroupByUnsupported                 = 3003;
+//    kQueryGroupByInvalidAggrCol              = 3004;
+//    kQueryGroupByInvalidGroupByCol           = 3005;
+//    kQueryGroupByInvalidNumBuckets           = 3006;
+//    kQueryGroupByMissingAggrCol              = 3007;
+//    kQueryGroupByInvalidRawCol               = 3008;
+//    kQueryGroupByInvalidGroupLimit           = 3009;
+//    kQueryGroupByInvalidBooleanExpr          = 3010;
+//    kQueryGroupByInvalidComparisionExpr      = 3011;
+//    kQueryGroupByInvalidPreprocessed         = 3012;
+//    kQueryGroupByAggrError                   = 3013;
+//    kQueryUndefinedMetricType                = 3014;
+//    kQueryGroupByInvalidGroupByColType       = 3015;
+//    kQueryInvalidDownSamplingInterval        = 3016;
+//    kQueryGroupByInvalidBucketIntervals      = 3017;
+//    kCursorQueryForAggregateColumn           = 3018;
+//    kCursorQueryForLookups                   = 3019;
+//    kCursorQueryForGroupBy                   = 3020;
+//    ... (and other cursor/having/derived metric codes as in original)
+
+//-----------------------------------------------------------------------------
+// Dependency types (defined before Query and QueryGroupBy)
+//-----------------------------------------------------------------------------
+
+// Represents the generic list of data types supported.
+message DataValue {
+  // Exactly one of the following values is required.
+
+  message StrList {
+    // List of strings.
+    repeated string value_list = 1;
+  }
+
+  message Int64List {
+    // List of 64bit integers.
+    repeated int64 value_list = 1;
+  }
+
+  message BoolList {
+    // List of booleans.
+    repeated bool value_list = 1;
+  }
+
+  message UInt64List {
+    // List of 64bit unsigned integers.
+    repeated uint64 value_list = 1;
+  }
+
+  message FloatList {
+    // List of floats.
+    repeated float value_list = 1;
+  }
+
+  message DoubleList {
+    // List of doubles.
+    repeated double value_list = 1;
+  }
+
+  message BytesList {
+    // List of bytes.
+    repeated bytes value_list = 1;
+  }
+
+  // This is for storing histogram data. We support 2 different kind of
+  // histograms.
+  // Type 1:
+  // -------
+  // For histograms with keys which can be represented in a range,
+  // we have cumulative histogram. For example, histogram for latency, age, etc
+  // which can be bucketized based on upper bound. Sample buckets would be
+  // no. of requests under 1 sec latency, no. of requests under 5 sec latency,
+  // etc. So incase of cumulative histogram, the bucket_upper_bounds_list
+  // will be a list of numerically increasing numbers representing the upper
+  // bound value of each bucket and bucket_counts_list consist of cumulative
+  // count of data points whose value is less than or equal to upper bound.
+  // With this definition, the length of both the lists should always be the
+  // same.
+  // Example: bucket_upper_bounds_list: [10, 100, 500, 1000]
+  //                bucket_counts_list: [15, 25, 30, 50]
+  // This indicates that, there were 15 data points whose value is <= 10,
+  // 25 data points with value <= 100 and so on. Note that the count here is
+  // cumulative. The 25 data points under value 100 also includes the 15 data
+  // points under value 10.
+  //
+  // Type 2:
+  // -------
+  // For histograms with keys which cannot be represented as ranges, we have
+  // count based histograms. For example, histogram of RPC Error types, Gender,
+  // etc. Sample buckets would be no.of RPC errors with Timeout error, no. of
+  // RPC errors with Internal Server error, etc. So incase of count based
+  // histograms, bucket_keys_list will be a list of strings representing the
+  // key for each bucket and bucket_counts_list consist of total count of data
+  // points with that particular key. With this definition, the length of both
+  // the lists should always be the same.
+  // Example: bucket_keys_list: ["Error type1", "Error type2", "Error type3"]
+  //        bucket_counts_list: [15, 25, 30]
+  // This indicates that, there were 15 data points with Error typ1, 25 data
+  // points with Error type2 and so on.
+  message Histogram {
+    oneof BucketsList {
+      // For cumulative histogram
+      FloatList bucket_upper_bounds_list = 1;
+      // For count based histogram
+      StrList bucket_keys_list = 2;
+    }
+    repeated uint64 bucket_counts_list = 3;
+  }
+
+  // Fields 1 to 15 are deprecated.
+
+  oneof ValueType {
+    string str_value = 16;
+
+    int64 int64_value = 17;
+
+    bool bool_value = 18;
+
+    uint64 uint64_value = 19;
+
+    float float_value = 20;
+
+    double double_value = 21;
+
+    // This is for storing blobs that are not interepreted by the DB. This data
+    // type cannot be used in any of the filtering clauses such as group by,
+    // where, aggregate columns etc.
+    bytes bytes_value = 22;
+
+    // Important: Fields between 10 to 15 are deprecated. Do not use them.
+    StrList str_list = 23;
+
+    // List of 64bit integers.
+    Int64List int64_list = 24;
+
+    // List of booleans.
+    BoolList bool_list = 25;
+
+    // List of 64bit unsigned integers.
+    UInt64List uint64_list = 26;
+
+    // List of floats.
+    FloatList float_list = 27;
+
+    // List of doubles.
+    DoubleList double_list = 28;
+
+    // List of bytes.
+    BytesList bytes_list = 29;
+
+    // Marshalled JSON object stored as bytes.
+    // This datatype is unsupported in IDF.
+    // Supported only by 'Nusights - Nutanix Insights'.
+    bytes json_obj = 30;
+
+    // Histogram data.
+    // This datatype is unsupported in IDF.
+    // Supported only by 'Nusights - Nutanix Insights'.
+    Histogram histogram_obj = 31;
+  }
+
+  // This field should not be set by the client API.
+  optional uint64 count = 8 [default = 1];
+}
+
+// TimeValuePair encapsulates a single entry in timeseries data. It contains a
+// timestamp and a value corresponding to that timestamp.
+message TimeValuePair {
+  // Required.
+  optional uint64 timestamp_usecs = 1;
+
+  // Required.
+  optional DataValue value = 2;
+}
+
+// MetricData contains the name of the attribute along with the metric value at
+// various times.
+message MetricData {
+  // Required.
+  optional string name = 1;
+
+  // Optional. The namespace which this attribute belongs to.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string namespace = 3 [default = "_default_"];
+
+  // Optional.
+  repeated TimeValuePair value_list = 2;
+}
+
+// These are the set of fields required to register any metric.
+message MetricType {
+  // Aggregation and downsampling operators.
+  enum Operator {
+    kSum = 0;
+    kMax = 1;
+    kMin = 2;
+    kAvg = 3;
+    // Last value will prevail.
+    kLast = 4;
+    kCount = 5;
+  }
+}
+
+// The EntityGuid uniquely represents any entity. Entities are instances of
+// EntityType's. For example, (entity type = disk, entity id = d1) is an entity
+// of the entity type 'disk'.
+message EntityGuid {
+  // Required.
+  optional string entity_type_name = 1;
+
+  // Optional. If not specified, the entity guid represents a list of entities
+  // all of which have the entity type specified by 'entity_type_name'.
+  // If specified, entity_id must be non-empty.
+  optional string entity_id = 2;
+
+  // Optional. The tenant to which this EntityGuid belongs. In update / delete,
+  // tenant ID must be specified correctly. In Get, if it is unset, that is to
+  // get the entity ID belonging to any tenant; if it is set and empty, that is
+  // to get the entity ID in global. Note that tenant_id is not used for
+  // identity purpose since entity_id is already unique.
+  optional string tenant_id = 3;
+}
+
+// Encapsulates an entity with a list of metric data.
+message EntityWithMetric {
+  // Required.
+  optional EntityGuid entity_guid = 1;
+
+  // Optional.
+  repeated MetricData metric_data_list = 3;
+}
+
+enum GlobalDataReadConsistency {
+  kEventual = 0;
+  kStrict = 1;
+}
+
+/************* Start of message definitions related to queries ***************/
+
+// Defines the leaf of an expression tree. It is either a column or a data
+// value. Examples of a column are 'num_iops' and 'disk_size'. A value can
+// be any string or numeric constant.
+message LeafExpression {
+  // Either 'column' or 'value' is required.
+  optional string column = 1;
+
+  optional DataValue value = 2;
+
+  // Optional. The namespace 'column' belongs to.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string column_namespace = 3 [default = "_default_"];
+
+  // If 'column' is an entity type, the query processing pipeline creates
+  // ancestor relationship tree through the parent links (aka foriegn key
+  // references) in the entity. For instance, virtual_disk has a reference to
+  // vm, and vm has a reference to cluster, insights will filter virtual_disk
+  // entities based on the cluster to which they belong. If the client wants
+  // insights server to make use of immediate entity-type attribute value for
+  // filtering instead of the ancestor relationship, it could set
+  // 'suppress_ancestor_tree_traversal' to true. Note that if the same column
+  // is specified in multiple leaf expressions,
+  // 'suppress_ancestor_tree_traversal' should be set for all the instances or
+  // none.
+  // Note that the field is required to be set in lhs in order for it to come
+  // into effect. Setting the field in the rhs won't have any effect.
+  optional bool suppress_ancestor_tree_traversal = 4 [ default = true];
+}
+
+// This defines an expression that evaluates to a non-boolean value, for
+// example: column1 + column2, column1.
+message Expression {
+  enum Operator {
+    kPlus   = 0;
+    kMinus  = 1;
+    kMult   = 2;
+    kDiv    = 3;
+    kMod    = 4;
+    kConcat = 5;
+  }
+
+  // As specified in the grammar listed in the definition of BooleanExpression,
+  // an expression can be exactly one of the following:
+  // - lhs operator rhs
+  // - leaf
+
+  optional Expression lhs = 1;
+
+  optional Operator operator = 2;
+
+  optional Expression rhs = 3;
+
+  optional LeafExpression leaf = 4;
+}
+
+// This defines a comparison expression that evaluates to a boolean value, for
+// example: lhs != rhs, lhs >= rhs and so on.
+message ComparisonExpression {
+  enum Operator {
+    kEQ = 0;
+    kNE = 1;
+    kLT = 2;
+    kLE = 3;
+    kGT = 4;
+    kGE = 5;
+
+    // Performs a regex match for the specified column and includes those
+    // entities for which the regex match with the specified 'value' succeeds.
+    // If the column value is not specified in comparison expression
+    // (wild card), insights server would iterate over all the attributes for
+    // the entities and include those entities for which there is a regex match.
+    // The regex is specified in ECMAScript syntax with special characters:
+    // *+|^[]$.
+    // Query examples:
+    // 1. To match by substring
+    //    comparison expression value: ".*a36afd3d-2d0a-4df1-9991-605e4991b6.*"
+    // 2. To match by start of the string
+    //    comparison expression value: "^a36afd3d-2d0a-4df1-9991-605e4991b6.*"
+    // 3. To match by start and end of the string
+    //    comparison expression value: "^a36afd3d.*7b79$"
+    // 4. To match with multiple substrings
+    //    comparison expression value: ".*1234.*|.*9991.*|.*6789.*"
+    kLike = 6;
+
+    // Includes the entities for which the 'rhs' expression is a subset of the
+    // metric values specified in the 'lhs'.
+    kContains = 7;
+
+    // Includes the entities for which the metric values specified in the 'lhs'
+    // is a subset of 'rhs'.
+    kIN = 8;
+
+    // If the intersection of LHS and RHS is not empty, then kAny will evaluate
+    // to true, otherwise false.
+    // In the case of entity type attributes, the LHS is the set of the
+    // ancestor UUIDs. All the UUIDs should be of the same ancestor type as the
+    // type mentioned in the LHS column name.
+    // In the case of the normal attributes, the LHS is the attribute value
+    // list.
+    kAny = 9;
+
+    // This is a unary operator to check for the existence of a value for the
+    // column specified in the LHS leaf expression.
+    // NOTE: Non-existence check (kNot (kExists)) on a namespace attribute will
+    //       also filter out entities that don't have the namespace populated.
+    kExists = 10;
+
+    // This operator is only valid for conditional watches(no support in query).
+    // This is a unary operator to check that value for the attribute specified
+    // has changed from the previous value. This includes changes from a null
+    // value to a non-null value and vice versa.
+    // For detailed semantics of this operator especially with respect to
+    // current state filtering, please refer to:
+    // main/insights/insights_server/watch/watches_framework_guarantee.txt
+    kChanged = 11;
+  }
+
+  // Required.
+  optional Expression lhs = 1;
+
+  // Required.
+  optional Operator operator = 2;
+
+  // Required.
+  optional Expression rhs = 3;
+}
+
+// Defines a general boolean expression, as specified by the following grammar:
+//
+// BooleanExpression -> BooleanExpression BooleanOperator BooleanExpression |
+//                      NOT BooleanExpression |
+//                      CORRELATE BooleanExpression |
+//                      ComparisonExpression
+// BooleanOperator   -> AND | OR
+//
+// ComparisonExpression -> Expression ComparisonOperator Expression
+// ComparisonOperator   -> EQ | NE | GT | GE | LT | LE | LIKE | CONTAINS | IN
+//
+// Expression         -> Expression ExpressionOperator Expression |
+//                       LeafExpression
+// ExpressionOperator -> PLUS | MINUS | MULT | DIV | MOD | CONCAT
+// LeafExpression     -> Column | Value
+message BooleanExpression {
+  enum Operator {
+    kAnd = 0;
+    kOr = 1;
+    kNot = 2;
+    // Unary operator which forces evaluation to be done based
+    // on indexes of the list values. The expression with this
+    // operator should always contain a nested boolean expr
+    // with kAnd or kOr operators. The evaluation would return
+    // an entity if any one index in either of the expressions
+    // satisifes the filter for kOr or if the same index in both
+    // the expressions satisfies the filter for kAnd.
+    // Eg: If we have two entities with attr values
+    //  +----+----------+----------+
+    //  |    | attr1    | attr2    |
+    //  +----+----------+----------+
+    //  | e1 | {5, 70}  | {30, 50} |
+    //  +----+----------+----------+
+    //  | e2 | {10, 60} | {30, 80} |
+    //  +----+----------+----------+
+    // Then the expression kCorrelate { attr1 >= 10 kAnd attr2 <= 40 }
+    // would cause only e2 to be filtered because if the values
+    // are compared based on their index positions in the list,
+    // only <e2, 0th index> i.e (10, 30) would satisfy the given
+    // range in the where_clause i.e {10, 40}. The rest {5, 30},
+    // {70, 50} & {60, 80} all fall out of range.
+    //
+    // The operator is not supported :
+    //   1) for evictable entities.
+    //   2) if the where_clause branch contains kNot operator as
+    //      a direct / indirect parent or child.
+    //   3) for ancestor filtering or wildcard comparison queries.
+    //   4) for having clause expressions or watch filter criteria.
+    //   5) for nested kCorrelate expressions.
+    //   6) for non-existence expressions ( i.e kEQ null )
+    //   7) for direct comparison expressions or only expressions with
+    //      unary comparison operators (like kExists) i.e expressions
+    //      of the form (kCorrelate ( kExists ( comp_expr ) )     or
+    //                  (kCorrelate ( comp_expr ) )
+    //
+    // NOTE : Currently indexes will not be used if the where_clause
+    //        contains even a single kCorrelate operator.
+    //
+    //        Under Correlate clause, kEQ NULL would filter an entity
+    //        if it does not contain any value for the attribute.
+    //        Similarly kNE NULL (or kExists) would filter an entity
+    //        if it contains some value populated.
+    //
+    //        For the correlate where_clause, value of
+    //        insights_query_max_values_for_kcorrelate is the maximum value of
+    //        sum of all list values that can be present in all the distinct
+    //        attributes across all entities. If total list values exceeds that
+    //        limit query will fail with kInvalidRequest with sub-error
+    //        type as kQueryCorrelateIndexLimitExceeds.
+    kCorrelate = 3;
+  }
+
+  // From the above grammar, a boolean expression can be exactly one
+  // of the following:
+  // - lhs operator rhs (where operator = AND or OR)
+  // - operator lhs     (where operator = NOT)
+  // - comparison_expr
+
+  optional BooleanExpression lhs = 1;
+
+  optional Operator operator = 2;
+
+  optional BooleanExpression rhs = 3;
+
+  optional ComparisonExpression comparison_expr = 4;
+}
+
+// Specifies a column that needs to be aggregated for each group of entities
+// in a group-by query, along with the operator to perform the aggregation.
+message QueryAggregateColumn {
+  // Required.
+  optional string column = 1;
+
+  // Optional. The aggregation operator to use to aggregate 'column'.
+  // If not specified here, 'column' should be a registered metric / attribute
+  // with the the aggregation operator specified as part of registration.
+  optional MetricType.Operator operator = 2;
+
+  // Optional. The operator to use for downsampling the column values.
+  // If not specified here, 'column' should be a registered metric / attribute
+  // with the downsampling operator specified as part of registration.
+  optional MetricType.Operator down_sampling_operator = 3;
+
+  // Optional. the namespace of the column to aggregate on.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string column_namespace = 4 [default = "_default_"];
+
+  // Optional. Specified only if joins are requested on an ancestor entity
+  // type. For ancestor joins, the query response will contain the 'column'
+  // values of the ancestor in the 'SummaryResults'. Note that for ancestor
+  // joins, the 'column' values are not really aggregated - its just the
+  // ancestor's 'column' value. The aggregation 'operator' is not used for
+  // ancestor joins. Currently, the 'ancestor_entity_type' can only be the
+  // 'group_by_column' attribute.
+  optional string ancestor_entity_type = 5;
+
+  // Optional. Specified if we want to ignore missing values from the
+  // calculation of aggregate values. If set to false, values at missing
+  // timestamps are filled with the previous values (default behaviour). If set
+  // to true, values at missing timestamps are ignored from calculations.
+  optional bool ignore_missing_values = 6 [default = false];
+}
+
+// Specifies a column that needs to be returned in its raw form, for each
+// entity that the query applies to (with entities grouped appropriately if
+// the query is a group-by query).
+message QueryRawColumn {
+  // Required.
+  optional string column = 1;
+
+  // Optional. The operator to use for downsampling the column values.
+  // If not specified here, 'column' should be a registered metric / attribute
+  // with the downsampling operator specified as part of registration.
+  optional MetricType.Operator down_sampling_operator = 2;
+
+  // Optional. The namespace which this column belongs to.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string column_namespace = 3 [default = "_default_"];
+}
+
+// Specifies grouping of entities in a query. Also specifies the list of
+// columns that need to be aggregated for each entity group, and the list
+// of columns whose raw values need to be returned for each entity.
+// TODO (ramesh): incorporate 2D groups.
+message QueryGroupBy {
+  // Specifies whether the group_by_column is discrete-valued (e.g., VM power
+  // state), or is continuous (e.g., VM memory usage). For discrete-valued
+  // columns, grouping is done by exact matches, whereas for continuous
+  // columns, grouping is done by dividing the column values into buckets.
+  enum GroupByColumnType {
+    kDiscrete = 0;
+    kContinuous = 1;
+  }
+
+  // Optional. If not specified, this is not a group-by query and none of the
+  // other fields specific to group-by queries should be specified. The query
+  // then is a raw query and fields related to raw results can be specified.
+  optional string group_by_column = 1;
+
+  // Only valid for group-by queries.
+  optional GroupByColumnType group_by_column_type = 2 [default = kDiscrete];
+
+  // Only valid for group-by queries.
+  // Required for continuous column values. Specifies the number of buckets
+  // into which the range of group-by column values need to be divided. For
+  // example: if the group-by column is VM memory usage and the memory usage
+  // for all VMs being grouped falls between 1GB and 3GB, then the buckets
+  // with 'num_buckets'=2 would be [1, 2) and [2, 3].
+  optional uint32 num_buckets = 3;
+
+  // Optional. Meaningful only for continuous column values. Specifies the
+  // values to which the bucket values should be rounded to, so that they are
+  // not arbitrary numbers. For example: if memory usage of VMs being grouped
+  // falls between 1250MB and 3750MB, and num_buckets is 3, then without
+  // boundaries the buckets would be [1250, 2080), [2080, 2910), [2910, 3750],
+  // which are not very user-friendly. Specifying a bucket_boundary of 1000
+  // would make the buckets a more user-friendly [1000, 2000), [2000, 3000),
+  // [3000, 4000].
+  // Only valid for group-by queries.
+  optional uint32 bucket_boundary = 4;
+
+  // Same as bucket_boundary field but supports a larger range of values.
+  // Clients are recommended to use large_bucket_boundary instead of
+  // bucket_boundary in the query arg going forward. However, queries would
+  // still work with bucket_boundary if the value fits in the range of uint32.
+  // The value of bucket_boundary, if set, would be copied to
+  // large_bucket_boundary during query evaluation for further processing.
+  optional uint64 large_bucket_boundary = 18;
+
+  // The list of columns that needed to be aggregated.
+  // Only valid for group-by queries.
+  // Aggregation for evictable entities is performed after applying the
+  // raw_limit on raw_results. For non-evictable entities aggregation is
+  // performed before applying raw_limit, hence contains aggregated results
+  // for all the entities that belong to the group.
+  // In a multidimensional groupby query aggregate columns can be set in
+  // either the outermost or innermost groupby clauses only. This
+  // multidimensional aggregation is not supported for continuous grouping,
+  // kGroupByListValues query flag and for an ancestor entity type column.
+  repeated QueryAggregateColumn aggregate_columns = 5;
+
+  // The 'sort_column' in this field should be 'group_by_column' or one of the
+  // 'aggregate_columns' (otherwise, we don't have a single value per group
+  // that can be used to sort the groups). If 'sort_column' is the same as
+  // 'group_by_column' and the 'aggregate_column', the query would use the
+  // 'group_by_column' value for sorting. Also, sorting by a column that is
+  // duplicated in aggregate_columns isn't supported.
+  // Only valid for group-by queries.
+  optional QueryOrderBy group_sort_order = 6;
+
+  // The maximum number of groups to return in the result.
+  // Only valid for group-by queries.
+  optional QueryLimit group_limit = 7;
+
+  // The list of columns for which raw values need to be returned.
+  repeated QueryRawColumn raw_columns = 8;
+
+  // Downsampling interval in seconds. For bucketized metrics, if
+  // 'down_sampling_interval_secs' is less than the metrics sampling interval,
+  // the metrics sampling interval will be used instead. The number of down
+  // sampled values returned is calculated by
+  // (ceiling(end_time_usecs, down_sampling_interval_secs) -
+  //  floor(start_time_usecs, down_sampling_interval_secs)) /
+  //   down_sampling_interval_secs
+  // Therefore depenidng on the values of start and end times, the same time
+  // range will result in 1 or 2 values being returned.
+  optional uint32 down_sampling_interval_secs = 9;
+
+  // The entities within each group for which the raw results would be
+  // returned, are sorted by the value of this column.
+  //
+  // For evictable entities, IDF does not support queries with
+  // raw_sort_order AND raw_limit (below) if raw_sort_order.sort_column
+  // is a non-indexed column.
+  // Note: Either one of 'raw_sort_order' and 'raw_sort_order_list' should
+  // be set in the query arg.
+  optional QueryOrderBy raw_sort_order = 10;
+
+  // The entities within each group for which the raw results would be
+  // returned are sorted by the values of sort columns in 'raw_sort_order_list'.
+  // The preference for sorting will be given in the order in which the sort
+  // columns in 'raw_sort_order_list' are specified.
+  // If the value of all the sort columns is same for two entities, the final
+  // decision will be based on 'entity_id' and the sort order will be the same
+  // as that of the last sort column in 'raw_sort_order_list'.
+  // Note: Either one of 'raw_sort_order' and 'raw_sort_order_list' should
+  // be set in the query arg.
+  repeated QueryOrderBy raw_sort_order_list = 20;
+
+  // Limit on the number of raw results returned for each group.
+  optional QueryLimit raw_limit = 11;
+
+  // Downsampling interval to use when fetching metric data from the
+  // Insights store for this query.
+  optional MetricDataDownSamplingInterval store_ds_interval = 12;
+
+  // Optional. The namespace which the group by column belongs to.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string group_by_column_namespace = 13 [default = "_default_"];
+
+  // Optional. This is part of specifying Multi Dimensional
+  // GroupBy. Each sub groupby clause requires 'group_by_column' and
+  // its properties to be specified. Currently if sub groupby is
+  // specified, except for aggregate columns the groupby properties
+  // are allowed in the innermost sub groupby only.
+  // If sub groupby is specified, aggregate columns can be specified
+  // in the outermost and innermost groupby clauses only. In case of
+  // multi-dimensional aggregation, default group would contain the
+  // group summaries across all the grouping levels.
+  optional QueryGroupBy sub_group_by = 14;
+
+  // If 'group_by_column' is an entity type, query processing pipeline creates
+  // ancestor relationship tree through the parent links (aka foriegn key
+  // references) in the entity. For instance, virtual_disk has a reference to
+  // vm, and vm has a reference to cluster, insights will group virtual_disk
+  // entities based on the cluster to which they belong. If the client wants
+  // insights server to make use of immediate entity-type attribute value for
+  // the group instead of the ancestor relationship, it could set
+  // 'suppress_ancestor_tree_traversal' to true.
+  // Currently, in case of multi-dimensional grouping, if ancestor tree
+  // traversal is suppressed for a column, it is necessary for rest of the
+  // group_by columns to either be non-ancestors or
+  // 'suppress_ancestor_tree_traversal' should be set for them as well.
+  optional bool suppress_ancestor_tree_traversal = 15 [default = true];
+
+  // Used to set user-defined buckets for continuous grouping. If set with
+  // values {v1, v2, v3 ... vn-1, vn }, the groups will be [int64_min, v1),
+  // [v1, v2), [v2, v3) .... [vn, int64_max]. These groups will have the
+  // starting value as the 'group_by_column_value'. The value of int64_min is
+  // -9223372036854775808 and the value of int64_max is 9223372036854775807.
+  // Entities with values which don't have an int64 value set will be put in
+  // the default set.
+  // The values given {v1, v2 .... vn} must be in strictly ascending order.
+  // Otherwise, the query will result in a kQueryGroupByInvalidBucketIntervals
+  // error.
+  // This field shall only be set for continuous grouping. Otherwise, a
+  // kQueryGroupByInvalidBucketIntervals error will be returned.
+  // Currently, this is supported only for single dimensional grouping.
+  // Otherwise, a kQueryGroupByInvalidBucketIntervals error will be returned.
+  // Currently, this is supported only for int64 value types in DataValue and
+  // regardless of the data value type of the metric, only the int64 values
+  // set here in bucket_interval_separators will be used.
+  repeated DataValue bucket_interval_separators = 16;
+
+  // Lookup queries that can be used to join entities from other entity types.
+  // Currently lookup queries have the following restrictions:
+  //  - cannot have group_by_column
+  //  - must have one lookup condition (ComparisonExpression for column
+  //    in the parent query and column in a lookup query)
+  //  - the lookup condition can use only kEQ, kIN, kContains or kAny
+  //  - the lookup condition can either be the only condition or the first
+  //    ComparisonExpression in the where_clause followed by kAND operator
+  //  - the lookup condition must be on a raw_column
+  //  - lookup attributes in the parent results must be singular values for
+  //    kContains operator (list values are ignored)
+  // Lookup queries can be nested (i.e. a lookup query can contain
+  // another lookup query).
+  repeated Query lookup_query = 17;
+
+  // Optional. Set of predicates that are used to include or exclude groups.
+  // 'having_clause' is a filter condition on 'group_by_column' or
+  // 'aggregate_columns' (yet to be implemented) or both. HAVING clause in
+  // query 'group_by' is useful in the following cases:
+  // 1. when 'group_by_column' is a list value and grouping is done by single
+  //    values. This leads to extra/unwanted results even after filtering
+  //    ('where_clause'). If 'group_by_column' has single values then
+  //    'where_clause' on 'group_by_column' will suffice.
+  // 2. When the groups are required to be filtered based on aggregate values.
+  optional BooleanExpression having_clause = 19;
+}
+
+// Encapsulates entity with metrics and lookup results (used in queries
+// that have lookup subqueries).
+message EntityWithMetricAndLookup {
+  // Required.
+  optional EntityWithMetric entity_with_metrics = 1;
+
+  // Lookup query results.  The number and order of these would match
+  // the number and order of lookup queries at the corresponding nesting
+  // level.
+  repeated LookupQueryResult lookup_query_results = 2;
+}
+
+// Defines result for queries that have lookup subqueries.
+message LookupQueryResult {
+  // Results.
+  repeated EntityWithMetricAndLookup results = 1;
+}
+
+// Defines the result for each group returned by a query. If a query does not
+// have a group-by clause and only has raw select clauses, then a single group
+// is returned without 'group_by_column_value' or 'group_summaries'.
+message QueryGroupResult {
+  message SummaryResult {
+    optional MetricData summary_data = 1;
+    optional MetricType.Operator summary_operator = 2;
+    // Optional. Set only for ancestor joins, where the 'summary_data' contains
+    // the metric data for the requested ancestor 'column'.
+    optional string ancestor_entity_type = 3;
+  }
+
+  // For a discrete group_by_column, specifies the exact value of the column.
+  // For a continuous column, specifies the lower bound of the bucket for this
+  // group. Meaningful only if the query has a group-by clause.
+  optional DataValue group_by_column_value = 1;
+
+  // Specifies the aggregate column values for this group, which can be
+  // aggregate values or ancestor column values. Meaningful only if the query
+  // has a group-by clause. If the query has a time range specified, historical
+  // aggregates are returned for each column, otherwise a single aggregate is
+  // returned for each column.
+  repeated SummaryResult group_summaries = 2;
+
+  // Specifies the raw column values. If the query has a time range specified,
+  // historical values are returned for each column, otherwise a single value
+  // is returned for each column. For queries that don't request raw_columns,
+  // 'raw_results' will just contain the guids of entities that match the given
+  // criteria. For instance, if the query was to return all 'vm' entities,
+  // raw_results will contain the guid of all vm entities.
+  repeated EntityWithMetric raw_results = 3;
+
+  // Total number of entities in the group. This may be greater than the size
+  // of 'raw_results' (i.e., not all entities may be returned in 'raw_results')
+  // because of 'raw_limit'.
+  optional int64 total_entity_count = 4;
+
+  // Multidimensional GroupBy results are nested in the order specified.
+  repeated QueryGroupResult sub_group_results = 5;
+
+  // Lookup query results.  If a lookup query is present, raw_results will
+  // be empty, raw results will be stored in lookup_query_results.
+  repeated EntityWithMetricAndLookup lookup_query_results = 6;
+}
+
+message QueryOrderBy {
+  enum SortOrder {
+    kAscending = 0;
+    kDescending = 1;
+  }
+
+  // When sorting using a time-series column, we need to map the multiple
+  // values in the time-series to a single value. This specifies how we do
+  // the mapping.
+  enum SortKey {
+    // Use the maximum value of the column in the time range.
+    kMax = 0;
+    // Use the minimum value of the column in the time range.
+    kMin = 1;
+    // Use the first value of the column in the time range.
+    kFirst = 2;
+    // Use the last value of the column in the time range.
+    kLast = 3;
+    // Use the latest value of the column and ignore the other values
+    // in the time range.
+    kLatest = 4;
+    // Use the avg value of the column in the time range.
+    // It takes non-numeric values as 0.
+    // If all data are non-numeric, an error of kInvalidRequest will be thrown.
+    // It only works for raw column sort and group sort on aggregate column.
+    kAvg = 5;
+  }
+
+  // Optional. The namespac which the sort column belongs to.
+  //
+  // In the context of 'Nusights - Nutanix Insights', if not specified,
+  // the metric belongs to the '_default_' namespace.
+  //
+  // In the context of 'IDF - Insights Data Fabric', if not specified, the
+  // metric value will be empty string and won't be used. To make a
+  // distinction with Nusights, the request will be rejected if it is
+  // explicitly set to '_default_' or empty string.
+  optional string sort_column_namespace = 4 [default = "_default_"];
+
+  // Required. The column on which to sort the results (either groups
+  // or raw results)of the query.
+  optional string sort_column = 1;
+
+  optional SortOrder sort_order = 2 [default = kAscending];
+
+  // TODO(swagat) : Replace default to kLatest after implementing it.
+  optional SortKey sort_key = 3 [default = kLast];
+}
+
+message QueryLimit {
+  // Optional. Specifies the number of results to return, after the sorting (if
+  // specified) is done.
+  optional int64 limit = 1;
+
+  // Optional. Number of results to skip before starting to accumulate results
+  // to return. Client can use this to implement simple cursors.
+  optional int64 offset = 2;
+}
+
+// DownSampling intervals supported by the Insights DB Store layer.
+message MetricDataDownSamplingInterval {
+  enum Type {
+    kRaw = 0;
+    kHourly = 1;
+  }
+
+  // Optional.
+  optional Type type = 1 [default = kRaw];
+}
+
+// A common struct to contain the node affinity details for workflows like
+// Watches and Cursors in deployments where the routing to specific nodes
+// might not be guaranteed.
+message NodeIdentifier {
+  // Contains the node_handle which is used IDF nodes to identify each other.
+  // This will be used for nodes to forward the requests between each other.
+  // As of this day, this is the same node_handle used by server.cc for
+  // identification. A combination of "<ip>:<port>".
+  optional string node_handle = 1;
+}
+
+// The query cursor object which captures the query context as well as the
+// position of the cursor. This is sent as part of the response during a cursor
+// query and the client is expected to pass this back to fetch the next
+// response of the cursor query.
+// All of this information is set and read by the server. The client is
+// supposed to just pass the cursor by copying it from the response to the
+// next request.
+message QueryCursor {
+  // Required. The cursor query id that is set by the server for identification
+  // and correlation with subsequent requests.
+  optional string cursor_query_id = 1;
+
+  // Required. The chunk number of the data in the current response. When this
+  // is passed back during subsequent requests, this is made use of to fetch
+  // the next chunk.
+  optional uint32 cursor_query_chunk_number = 2;
+
+  // Required. Whether more chunks are remaining. This will be set to true
+  // in all cases except the last ack.
+  optional bool chunks_remaining = 3;
+
+  // Required. What would be the node handle to which the request should be
+  // routed. Check NodeIdentifier for more details.
+  optional NodeIdentifier node_info = 4;
+}
+
+// A query plan that an Insights server can execute.
+// The order of evaluation of a query is where_clause followed by group_by.
+// TODO (ramesh): document the semantics of the query language.
+// TODO (ramesh): extend to support distributed fan-out queries.
+// Apart from using the normal entity metrics for doing where_clause, grouping,
+// sorting, raw_fetch, etc. IDF also provides these functionalities on some of
+// entity's metadata fields (also called pseudo attributes). The exact list of
+// pseudo attributes supported in query layer is :-
+//  +-------------------------------+-----------+
+//  |     pseudo_attribute_name     | date_type |
+//  +-------------------------------+-----------+
+//  |          _cas_value_          |   uint64  |
+//  +-------------------------------+-----------+
+//  |   _created_timestamp_usecs_   |   uint64  |
+//  +-------------------------------+-----------+
+//  | _db_modified_timestamp_usecs_ |   uint64  |
+//  +-------------------------------+-----------+
+//  |          _entity_id_          |   string  |
+//  +-------------------------------+-----------+
+//  |  _expiration_timestamp_usecs_ |   uint64  |
+//  +-------------------------------+-----------+
+//  |        _incarnation_id_       |   uint64  |
+//  +-------------------------------+-----------+
+//  | _last_synced_timestamp_usecs_ |   uint64  |
+//  +-------------------------------+-----------+
+//  |     _master_cluster_uuid_     |   string  |
+//  +-------------------------------+-----------+
+//  |   _modified_timestamp_usecs_  |   uint64  |
+//  +-------------------------------+-----------+
+//  |           _shard_id_          |   uint64  |
+//  +-------------------------------+-----------+
+//  |      _suppress_replication_   |    bool   |
+//  +-------------------------------+-----------+
+//  |          _tenant_id_          |   string  |
+//  +-------------------------------+-----------+
+//  |         _is_federated_        |    bool   |
+//  +-------------------------------+-----------+
+message Query {
+  // Required. Set of entities on which the query is performed.
+  // - All entities in 'entity_list' should be of the same entity type.
+  // - The set of all entities of a particular entity type is specified as an
+  //   EntityGuid with an empty entity id and the appropriate entity type.
+  repeated EntityGuid entity_list = 1;
+
+  // Optional. Start time for time-series queries. Should be non-negative.
+  // The value zero is reserved to indicate NOW. When set to zero, both
+  // 'start_time_usecs' as well as 'end_time_usecs' should be set to zero,
+  // indicating that this query is to fetch latest metric values.
+  optional uint64 start_time_usecs = 2 [ default = 0 ];
+
+  // Optional. End time for time-series queries. Should be greater than
+  // 'start_time_usecs', unless both 'start_time_usecs' and 'end_time_usecs'
+  // are set to zero. The end time is exclusive and the query returns metric
+  // data for the time range [start_time_usecs, end_time_usecs).
+  optional uint64 end_time_usecs = 3 [ default = 0 ];
+
+  // Optional. Number of sampling intervals before the current wallclock time
+  // that are considered when fetching the latest value of metric data.
+  optional int32 num_intervals_for_latest_data = 8 [default = 10];
+
+  // Optional. Set of predicates that are used to include or exclude entities.
+  // TODO (ramesh): add a timestamp field in the where_clause to support
+  // back-in-time queries (perhaps start and end times to support downsampling
+  // of the columns used in the where_clause).
+  optional BooleanExpression where_clause = 4;
+
+  // Optional. Defines the grouping of entities in the results. Also defines
+  // columns that need to be aggregated, as well as columns whose raw values
+  // need to be returned.
+  optional QueryGroupBy group_by = 5;
+
+  // Optional. Name for the query.
+  optional string query_name = 6;
+
+  // Optional. Allows for recursive queries.
+  //
+  // Note: Currently, this field should be set only to query
+  // preprocessed metrics data and only one from clause should
+  // bet set.
+  repeated Query from_clause = 7;
+
+  // Optional. If specified, only entities that belong to the shards in this
+  // list are returned. This, along with GetAllShardIds RPC, could be used by
+  // consumers for scaling their application. For instance, consumers can
+  // shard their application such that each instance owns a portion of the
+  // shard list that IDF returns as a response for 'GetAllShardIds' RPC. It
+  // could then query IDF only for the shards that it owns.
+  repeated string shard_id_list = 9;
+
+  enum FlagTypes {
+    // If set, don't ignore undefined columns.
+    kReturnErrorForUndefinedColumn = 0x1;
+
+
+    // If set, the query will behave as a count query wherein
+    // IDF will optimise the query processing pipeline by getting
+    // only the entity count i.e
+    // 1) If no filter / group_by clause is specified, the query ret
+    //    will only contain the total entity count for the entity type.
+    // 2) If a filter clause is specified, the query ret will only return
+    //    the entity count after filtering without raw results.
+    // 3) If a groupby column is specified, then each group will simply
+    //    contain the entity count within each group without any raw results.
+    // 4) If shard_id_list is specified, then only the count of entities
+    //    belonging to those shards is returned.
+    // NOTE: If any of the raw_column semantics are specified, this flag is
+    //       deemed invalid.
+    kSkipGuidsForEmptyRawColumns = 0x2;
+
+    // Enable multi-phase fetching of raw column values in the query pipeline.
+    // If set, IDF will first limit the entities it needs to return as defined
+    // in 'raw_limit' and then fetches the raw columns requested. If disabled,
+    // this happens the other way. Setting this to true provides performance
+    // benefits in certain cases. This is purely a performance flag and has no
+    // impact on the output.
+    kForceMultiPhaseRawColumnFetch = 0x4;
+
+    // If not set, continuous grouping query with 'num_buckets' will be executed
+    // into multiple(two) phases. In the first phase, we will fetch the max and
+    // min values of 'group_by_column' from processor nodes. We will then
+    // calculate the overall min and max value from the node responses, calculate
+    // the buckets based on min/max, 'num_buckets' and 'bucket_boundary' and send
+    // another query with these user defined buckets.
+    // Note: This flag should strictly be set if the clients have a continuous
+    // grouping query with 'num_buckets' and 'group_by_column' having non-numeric
+    // values across all the entities.
+    kForceSinglePhaseFetchContinuousGrouping = 0x8;
+
+    // If set, the query ret will contain the total unfiltered entity count
+    // for the specified entity type. Counts computed are agnostic of
+    // shard_id_list and entity_id_list.
+    kFetchTotalUnfilteredEntityCount = 0x10;
+
+    // If set, grouping will be done based on the list values for the entities.
+    // Eg: Say we have 3 entities with the group_by_column values as
+    // e1 - [v1, v2]
+    // e2 - [v3]
+    // e3 - [v2 , v1]
+    // Setting this flag will cause the groups to be formed as:
+    // [v1, v2] - e1, e3
+    // [v3] - e2
+    // Not applicable for continous grouping.
+    // Not supported for evictable entity types without a filter clause.
+    kGroupByListValues = 0x20;
+
+    // If set, the raw results in each group will be sorted in
+    // ascending order based on the shard ids.
+    // NOTE: raw_sort_order should not be set along with this flag.
+    kSortByShardIds = 0x40;
+
+    // If set, the query ret will contain the total unfiltered group count
+    // for the specified group by column. Only supported for kDiscrete grouping
+    // as of now. Counts computed are agnostic of shard_id_list and
+    // entity_id_list.
+    kFetchTotalUnfilteredGroupCount = 0x80;
+  }
+
+  // Optional. Any number of FlagTypes bitwise or-ed together.
+  optional uint64 flags = 10 [default = 0];
+
+  // Optional. The priority of the query. For now, three priority levels
+  // are supported.
+  // 0 - High priority query, i.e. foreground request such as UI serving.
+  // 1 - Low priority query, i.e. background requests.
+  // 2 - Low priority query with no caching, i.e background requests that
+  //     read large amounts of data only once.
+  optional int64 priority = 11 [ default = 1 ];
+
+  // Optional. If set to kStrictConsistency, the request on the global data
+  // will be forwarded to the master of the entity to be served.
+  // The 'master' is a notion in Federation. It is the only place where
+  // the write of the entity can happen. All slaves should only have the
+  // read-only copy of the entity and the write will be forwarded to the
+  // master to be processed.
+  optional GlobalDataReadConsistency global_data_read_consistency = 13
+    [ default = kEventual ];
+
+  // Query cursor parameters. Only to be set in case of cursor queries.
+  message CursorQueryInfo {
+    // Whether the query is an initial cursor query. Only to be set in case of
+    // the initial cursor query. For subsequent cursor queries, the cursor
+    // object should be set instead.
+    // If this is set, the query will be processed as a cursor query and the
+    // query result will be split and the response will carry with it the first
+    // chunk (from the split  query result) along with the next_cursor object.
+    // The client shall send this cursor object in the subsequent cursor query
+    // to fetch the next chunk. If no cursor is returned, then it means that
+    // the query has finished processing.
+    // Note: Cursor queries are not supported in case of group-by queries.
+    optional bool is_initial_cursor_query = 1;
+
+    // The batch size to be used for the cursor queries. Can be overridden by
+    // the default if this value is too high. The batch size is the upper
+    // bound on the number of entities returned in a single request - the
+    // actual count of entities returned may be less than this.
+    optional uint32 batch_size = 2;
+
+    // The cursor object to be set for subsequent queries. This should only be
+    // set by copying the cursor object 'next_cursor' from the response. If
+    // this field is set, then no other field in the Query proto needs to be
+    // set as this marker object captures the query context.
+    // If this is set, the query will be processed as the continuation of a
+    // cursor query and the next chunk of results will be returned along with
+    // the next_cursor object.
+    // The client shall send this cursor object in the subsequent cursor query
+    // to fetch the next chunk.
+    optional QueryCursor next_cursor = 3;
+
+    // The amount of time after last being accessed that a cursor query object
+    // will be kept in cache before being marked available for expiration.
+    // By default the expiration time of cursor query object is 30 sec which
+    // is governed by 'insights_cursor_query_objects_expiration_time_secs'
+    // flag. If the clients set custom cursor query expiration time in the
+    // proto, it takes precedence over the default value. The custom
+    // expiration time set by clients should be less than
+    // 'insights_cursor_query_max_custom_expiration_time_secs' which is kept
+    // to be 120 secs for now.
+    optional uint32 custom_expiration_time_secs = 4;
+  }
+  // Optional. To be set as described above.
+  optional CursorQueryInfo cursor_query_info = 14;
+}
+
+message HashedRange {
+  // Optional. The start value for the range. A query should include the entity
+  // with the start value. The default value is the beginning of the hashed
+  // value set.
+  optional string start_value = 1 [ default = "" ];
+
+  // Optional. The end value for the range. A query should exclude the entity
+  // with the end value. The default value is the beginning of the hashed
+  // value set.
+  optional string end_value = 2 [ default = "" ];
+}
+
+// Set of additional parameters for the query.
+message QueryProperties {
+  // The depth of the query (for recursive queries).
+  optional int32 query_depth = 1;
+
+  // Flag indicating if this query is to be executed as a leaf. By default, the
+  // the query executes as an aggregator.
+  optional bool execute_query_as_leaf = 2;
+
+  // Optional. Only consider the entities that fall in this hashed range when
+  // executing the query. This is used to split a query into smaller queries.
+  optional HashedRange hashed_range = 3;
+
+  // Optional. This value specifies the size of the time window over which the
+  // aggregation of the metrics data would be performed by the given query. The
+  // result of the aggregation would be a single value which would be
+  // representative of the aggregated metric over that time window. If this
+  // value is not specified, then it would be computed from the sampling
+  // intervales of the metrics used.
+  optional int64 sampling_interval_secs = 4;
+}
+
+/************* End of message definitions related to queries ***************/
+
+// This message encapsulates a query to the Insights server. 'query' represents
+// a query plan that the Insights server can execute. 'properties' encapsulate
+// various properties relating to how the query is evaluated.
+message GetEntitiesWithMetricsArg {
+  // Required.
+  optional Query query = 1;
+
+  optional QueryProperties properties = 2;
+
+  // Optional. Source service name which initiated the RPC.
+  optional string source_svc_name = 1000;
+}
+
+// Return payload of the 'GetEntitiesWithMetrics' RPC call.
+message GetEntitiesWithMetricsRet {
+  // Required.
+  repeated QueryGroupResult group_results_list = 1;
+
+  // Total number of groups. This may be greater than the size of
+  // 'group_results_list' (i.e., not all group results may be returned in
+  // 'group_results_list') because of 'group_limit'.
+  optional int64 total_group_count = 2;
+
+  message DownSamplingParameters {
+    // Required.
+    optional string metric_name = 1;
+
+    // Required. Down sampling interval in seconds.
+    optional int32 down_sampling_interval_secs = 2;
+
+    // Required. This operator was used to aggregate multiple updates received
+    // in one down_sampling_interval.
+    optional MetricType.Operator down_sampling_operator = 3;
+
+    // Optional. The namespace 'metric_name' belongs to.
+    //
+    // In the context of 'Nusights - Nutanix Insights', if not specified,
+    // the metric belongs to the '_default_' namespace. In IDF entity
+    // namespaces currently can only contain attributes, not metrics.
+    //
+    // In the context of 'IDF - Insights Data Fabric', if not specified, the
+    // metric value will be empty string and won't be used. To make a
+    // distinction with Nusights, the request will be rejected if it is
+    // explicitly set to '_default_' or empty string.
+    optional string namespace = 4;
+  }
+
+  // Required.
+  repeated DownSamplingParameters down_sampling_params = 3;
+
+  // Required. The execution time taken by this rpc on the insights server
+  // side in microseconds.
+  optional uint64 rpc_execution_time_usecs = 4;
+
+  // Optional. The next cursor in the case of cursor queries. If this is set,
+  // the client shall copy this cursor for the next request to fetch the
+  // next chunk of results. If not set, then it means that all results have
+  // been returned to the client..
+  optional QueryCursor next_cursor = 5;
+
+  // Optional. If the 'kFetchTotalUnfilteredEntityCount' flag is set in the
+  // GetEntitiesWithMetricsArg, this field will contain the total unfiltered
+  // entity count for the specified entity type.
+  optional uint64 total_unfiltered_entity_count = 7;
+
+  // Optional. If the 'kFetchTotalUnfilteredGroupCount' flag is set in the
+  // GetEntitiesWithMetricsArg, this field will contain the total unfiltered
+  // group count for the specified group by column. Only works for kDiscrete
+  // grouping as of now.
+  optional uint64 total_unfiltered_group_count = 8;
+}

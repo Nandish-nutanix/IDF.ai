@@ -1,0 +1,375 @@
+# group limit, raw limit and group sort and group limit. raw_column should
+@ always be present for an attribute on which we are performing sorting.
+query {
+  entity_list {
+    entity_type_name: "vm"
+  }
+  group_by {
+    group_by_column: "hypervisor_cpu_usage_ppm"
+    group_by_column_type: kContinuous
+    group_sort_order {
+      sort_column: "hypervisor_cpu_usage_ppm"
+    }
+    raw_sort_order {
+      sort_column: "num_vcpus"
+    }
+    raw_columns {
+      column: "num_vcpus"
+    }
+    group_limit {
+      limit: 10
+      offset: 0
+    }
+    raw_limit {
+      limit: 2
+      offset: 10
+    }
+    num_buckets: 4
+    bucket_boundary: 150
+  }
+  query_name: "group_and_raw_limit_and_offset"
+}
+
+# downsampling interval usage
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "num_io"
+        }
+        down_sampling_interval_secs: 300
+      }
+      query_name: "downsampling_interval"
+    }
+
+query {
+  entity_list {
+    entity_type_name: "vm"
+  }
+  group_by {
+    group_by_column: "hypervisor_cpu_usage_ppm"
+    group_by_column_type: kContinuous
+    aggregate_columns {
+      column: "memory_usage_bytes"
+      operator: kCount
+    }
+    group_sort_order {
+      sort_column: "hypervisor_cpu_usage_ppm"
+      sort_order: kAscending
+    }
+    bucket_interval_separators {
+      int64_value: 1
+    }
+    bucket_interval_separators {
+      int64_value: 2
+    }
+    bucket_interval_separators {
+      int64_value: 3
+    }
+  }
+  query_name: "group_sort"
+}
+# entity id specific query.
+query {
+      entity_list {
+        entity_type_name: "vm"
+        entity_id: "3cec611e-106b-4d1f-bc4a-883337ba3dcb"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      query_name: "entity_specific_query"
+    }
+
+query {
+  entity_list {
+    entity_type_name: "vm"
+  }
+  group_by {
+    raw_columns {
+      column: "controller.read_source_oplog_bytes"
+    }
+  }
+  start_time_usecs: 1571702400000000
+  end_time_usecs:   1571702400020000
+  query_name: "time_range_queries"
+}
+
+#To group entities based on value given in 'group_by_column'
+#'aggregate_columns' specifies the column that needs to be aggregated
+#for each group of entities in the response, along with
+#the operator to perform aggregation.
+arg = GetEntitiesWithMetricsArg()
+query = '''
+query {
+  entity_list {
+    entity_type_name: "vm" 
+  }
+  group_by {
+    group_by_column: "vm_name"
+    raw_columns { 
+      column: "_created_timestamp_usecs_" 
+    }
+    aggregate_columns {
+      column: "memory_usage_bytes"
+      operator: kAvg
+    }
+    raw_sort_order {
+      sort_column: "_created_timestamp_usecs_" 
+      sort_order: kDescending 
+    }
+    raw_limit {
+      limit: 10 
+      offset: 0 
+    }
+  } 
+  query_name: "aggregation"
+}
+
+#To group entities based on value given in 'group_by_column'
+#The range of group-by column values are divided into the number
+#of buckets specified by 'num_buckets' with the separator between
+#the buckets specified by 'bucket_boundary'
+arg = GetEntitiesWithMetricsArg()
+query = '''
+query {
+  entity_list {
+      entity_type_name: "vm" 
+  }
+  group_by {
+    group_by_column: "memory_usage_bytes"
+    group_by_column_type: kContinuous
+    group_sort_order {
+      sort_column: "memory_usage_bytes"
+    }
+    raw_limit {
+      limit: 10 
+      offset: 0 
+    }
+    num_buckets: 3
+    bucket_boundary: 70
+  } 
+  query_name: "continous_grouping"
+}
+
+#Sorts the entities according to the column and order
+#mentioned in the raw_sort_order in the query
+#Sort column can only be one of the raw columns
+arg = GetEntitiesWithMetricsArg()
+query = '''
+ query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+        raw_sort_order {
+          sort_column: "vm_name"
+          sort_order: kAscending
+        }
+      }
+      query_name: "fetching_raw_columns_and_sorting"
+    }
+#To return total entity count in query response, set flags=2.
+#The query only works for non-evictable type entities and wildcard
+#queries.
+#The flag will only return the entity count without any raw results
+#or guids. If raw columns ae specified in the query arg, the flag
+#would be deemed invalid.
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      flags: 2
+      query_name: "entity_count_query"
+    }
+
+#To achieve nested grouping based on more than one raw column 
+#of an entity type, we use multidimensional grouping. The innermost grouping 
+#will contain the entities that satisfy the raw column values of the groups.
+query {
+          entity_list {
+            entity_type_name: "vm"
+          }
+          group_by {
+            group_by_column: "memory_size_bytes"
+            sub_group_by {
+              group_by_column: "ip_addresses"
+              raw_columns {
+                column: "memory_size_bytes"
+              }
+              raw_columns {
+                column: "ip_addresses"
+              }
+            }
+          }
+        }
+
+#To achieve nested grouping based on more than one raw column 
+#of an entity type, we use multidimensional grouping. The innermost grouping 
+#will contain the entities that satisfy the raw column values of the groups.
+arg = GetEntitiesWithMetricsArg()
+query = '''
+query {
+          entity_list {
+            entity_type_name: "vm"
+          }
+          group_by {
+            group_by_column: "memory_size_bytes"
+            sub_group_by {
+              group_by_column: "ip_addresses"
+              raw_columns {
+                column: "memory_size_bytes"
+              }
+              raw_columns {
+                column: "ip_addresses"
+              }
+            }
+          }
+        }
+#To fetch attribute/stats of all the entities
+arg = GetEntitiesWithMetricsArg()
+query = '''
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+        raw_columns {
+          column: "num_vcpus"
+        }
+      }
+      query_name: "fetching_raw_columns"
+    }
+
+# knot and kexist operator examples
+query {
+  entity_list {
+    entity_type_name: "vm"
+  }
+  where_clause {
+    lhs { 
+      comparison_expr {
+        lhs {
+          leaf {
+            column: "disks"
+          }
+        }
+        operator: kExists
+      }
+    }
+    operator: kNot
+  }
+  query_name: "where_clause_kNot"
+}
+# kIn operator with list.
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column : "m1"
+            }
+          }
+          operator: kIN
+          rhs {
+            leaf {
+              value {
+                int64_list {
+                  value_list: 0
+                  value_list: 1
+                }
+              }
+            }
+          }
+        }
+      }
+      query_name: "where_clause_kIN"
+   }
+
+# EQ null case.
+query {
+      entity_list {
+        entity_type_name: "vm"
+      }
+      where_clause {
+        comparison_expr {
+          lhs {
+            leaf {
+              column: "num_vcpus"
+            }
+          }
+          operator: kEQ
+          rhs {
+            leaf {
+              value {
+              }
+            }
+          }
+        }
+      }
+      group_by {
+        raw_columns {
+          column: "vm_name"
+        }
+      }
+      query_name: "where_clause"
+    }
+
+#where clause can be nested using the boolean operators. Example : kAnd,
+#kOr, kNot
+query = '''
+query {
+  entity_list {
+    entity_type_name: "vm"
+  }
+  where_clause {
+    lhs { 
+      comparison_expr {
+        lhs {
+          leaf {
+            column: "node"
+          }
+        }
+        operator: kNE
+        rhs {
+          leaf {
+            value {
+              str_value: "node_1"
+            }
+          }
+        }
+      }
+    }
+    operator: kAnd
+    rhs {
+      comparison_expr {
+        lhs {
+          leaf {
+            column: "vm_name"
+          }
+        }
+        operator: kExists   
+      }
+    }
+  }
+  query_name: "nested_where_clause"
+}

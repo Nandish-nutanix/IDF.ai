@@ -1,0 +1,170 @@
+###############################################################################
+# This is the starting point of the generated Python code.
+###############################################################################
+# Code to instantiate the cpdb object. This is absolutely necessary to execute
+# a query. Hence this code SHOULD be present for every generated Python code.
+from insights_interface.insights_interface import InsightsInterface
+from cpdb.cpdb_query import *
+cpdb_rpc_client = InsightsInterface(INSIGHTS_IP, INSIGHTS_PORT)
+cpdb = Cpdb(cpdb_rpc_client)
+
+
+# Constructing a raw column expression for the python cpdb query object. All python codes
+# are indented in the ```python code block.
+```
+print COL("component")
+leaf {
+   column: "component"
+}
+```
+
+# Constructing a string value expression for the python cpdb query object.
+```
+>>> print STR("acropolis")
+leaf {
+   value {
+     str_value: "acropolis"
+   }
+}
+```
+
+# Constructing a operator expression for the python cpdb query object.
+```
+>>> print PLUS(UINT64(10), UINT64(20))
+lhs {
+   leaf {
+    value {
+       uint64_value: 10
+     }
+   }
+}
+operator: kPlus
+rhs {
+   leaf {
+     value {
+       uint64_value: 20
+     }
+   }
+}
+
+>>> print EQ(COL("component"), STR("acropolis"))
+comparison_expr {
+   lhs {
+     leaf {
+       column: "component"
+     }
+   }
+   operator: kEQ
+   rhs {
+     leaf {
+       value {
+         str_value: "acropolis"
+       }
+     }
+   }
+ }
+```
+
+# Constructing a query expression for the python cpdb query object. Example:
+# We are constructing a query expression to fetch all the tasks with the
+# component attribute equal to "acropolis". The query name is "ergon:test".
+```
+>>> print QUERY("ergon:test",
+                 FROM="task", WHERE=EQ(COL("component"), STR("acropolis")))
+entity_list {
+  entity_type_name: "task"
+}
+where_clause {
+  comparison_expr {
+    lhs {
+      leaf {
+        column: "component"
+      }
+    }
+    operator: kEQ
+    rhs {
+      leaf {
+        value {
+          str_value: "acropolis"
+        }
+      }
+    }
+  }
+}
+query_name: "ergon:test"
+```
+
+# Example of using the kIn operator for the python cpdb query object.
+```
+>>> print IN(COL("component"), STR_LIST(["acropolis", "ergon", "genesis"]))
+leaf {
+  column: "component"
+}
+operator: kIN
+rhs {
+  leaf {
+    value {
+      str_list: "acropolis"
+      str_list: "ergon"
+      str_list: "genesis"
+    }
+  }
+}
+```
+
+# Query to fetch the component and sequence_id attributes from the task entity
+# where either the component attribute is equal to "genesis" or "prism". The
+# query name is "ergon:query_example1".
+```
+>>> print  QUERY("ergon:query_example1",
+                  SELECT=["component", "sequence_id"],
+                  FROM="task",
+                  WHERE=ANY(EQ(COL("component"), STR("genesis")),
+                            EQ(COL("component"), STR("prism"))))
+```
+
+# Query to fetch the component and operation_type attributes from the task entity
+# where both the component attribute is equal to "genesis" and the operation_type
+# attribute is equal to "create-vm". The query name is "ergon:query_example2".
+```
+>>> print  QUERY("ergon:query_example2",
+                  FROM="task",
+                  WHERE=ALL(EQ(COL("component"), STR("genesis")),
+                            EQ(COL("operation_type"), STR("create-vm"))))
+```
+
+# Query to fetch the component and sequence_id attributes from the task entity,
+# sorted in descending order of the sequence_id attribute and limited to 5 results.
+# The query name is "ergon:query_example3".
+```
+field_names = ["component", "sequence_id"]
+q = QUERY("ergon:query_example3",
+           SELECT=field_names,
+           FROM="task",
+           WHERE=EQ(COL("component"), STR("genesis")),
+           ORDER_BY=DESCENDING("sequence_id"),
+           LIMIT=5)
+```
+# Query to fetch the component and sequence_id attributes from the task entity,
+# sorted in ascending order of the num_cpus attribute within the attribute
+# namespace-1 followed by descending order of the memory attribute.
+# The query name is "ergon:query_example4".
+```
+q = QUERY("ergon:query_example4",
+          SELECT=field_names,
+          FROM="task",
+          WHERE=EQ(COL("component"), STR("genesis")),
+          ORDER_BY=[ASCENDING("num_cpus","namespace-1"),DESCENDING("memory")],
+          LIMIT=5)
+```
+
+
+###############################################################################
+# Code to execute a query. To be done at the end. Just adding the semantics
+# for executing the query. This SHOULD be present at the end of every generated
+# Python code.
+###############################################################################
+# Code to execute a query.
+query = cpdb.query(query_proto)
+print(query)
+###############################################################################

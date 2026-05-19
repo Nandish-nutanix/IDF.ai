@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_MAX_LOADED_MODELS=2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Pulling required models..."
+        ollama pull qwen2.5-coder:7b-instruct
+        ollama pull nomic-embed-text
+        echo "All models pulled successfully."
+    restart: "no"
+
+  query-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_API_BASE_URL=http://ollama:11434/v1
+      - LLM_API_KEY=ollama
+      - LLM_CHAT_MODEL=qwen2.5-coder:7b-instruct
+      - LLM_EMBED_MODEL=nomic-embed-text
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - vectordb-data:/app/knowledge/schema/vectordb
+    working_dir: /app
+    command: >
+      python -c "
+      import sys; sys.path.insert(0, 'backend-server');
+      import uvicorn; uvicorn.run('server:app', host='0.0.0.0', port=8000)
+      "
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  ui-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - QUERY_SERVER_URL=http://query-server:8000
+      - UI_BACKEND_PORT=3001
+    depends_on:
+      query-server:
+        condition: service_healthy
+    working_dir: /app
+    command: >
+      python -c "
+      import sys; sys.path.insert(0, 'idf_query_ui/backend');
+      import uvicorn; uvicorn.run('app:app', host='0.0.0.0', port=3001)
+      "
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  ui-frontend:
+    image: nginx:alpine
+    ports:
+      - "3000:80"
+    volumes:
+      - ./idf_query_ui/frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - ui-backend
+    restart: unless-stopped
+
+volumes:
+  ollama-models:
+  vectordb-data:
