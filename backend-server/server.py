@@ -8,7 +8,18 @@ LLM-First pipeline:
 4. Code generation
 """
 
+# On hosts with an old system sqlite3 (e.g. RHEL 9 + Python 3.9), transparently
+# swap in the newer bundled pysqlite3 before ChromaDB is imported. No-op where
+# pysqlite3 is absent (macOS/MLX dev boxes), so it is safe everywhere.
+try:
+    import sys as _sys
+    __import__("pysqlite3")
+    _sys.modules["sqlite3"] = _sys.modules.pop("pysqlite3")
+except Exception:
+    pass
+
 import hashlib
+import json
 import logging
 import os
 import time
@@ -67,6 +78,12 @@ class QueryRequest(BaseModel):
     schema_mode: str = "real"
     generate_python: bool = False
     generate_go: bool = False
+    # Optional per-request LLM override ("bring your own model"). When an api_key
+    # is supplied the generation runs against this OpenAI-compatible endpoint
+    # instead of the local default (Ollama Phi-4-mini).
+    llm_api_key: Optional[str] = None
+    llm_base_url: Optional[str] = None
+    llm_model: Optional[str] = None
 
 
 class QueryResponse(BaseModel):
@@ -79,6 +96,7 @@ class QueryResponse(BaseModel):
     used_template: bool = False
     confidence: float = 0.0
     latency_ms: float = 0.0
+    llm_backend: Optional[str] = None
 
 
 @asynccontextmanager
@@ -107,8 +125,8 @@ async def lifespan(app: FastAPI):
     else:
         print("  WARNING: Ollama not reachable.")
 
-    if config.USE_FINETUNED_MODEL:
-        print("  Skipping Vector DB (fine-tuned model doesn't need RAG).")
+    if config.USE_FINETUNED_MODEL or getattr(config, "USE_GROUNDED_PIPELINE", False):
+        print("  Skipping schema Vector DB (grounded pipeline uses schema_service directly).")
     elif vectordb.is_vector_db_up_to_date():
         print("Vector DB exists and is up-to-date. Loading...")
         try:
@@ -124,6 +142,20 @@ async def lifespan(app: FastAPI):
     print("=" * 60)
     print("Server ready! Listening on http://{}:{}".format(config.SERVER_HOST, config.SERVER_PORT))
     print("=" * 60)
+
+    # Auto-index live stats in background if CVM is configured
+    cvm_host = os.getenv("DEFAULT_CVM_HOST", "")
+    if cvm_host:
+        cvm_password = os.getenv("CVM_SSH_PASSWORD", "nutanix/4u")
+        print(f"  [Live Stats] Will auto-index from {cvm_host} in background...")
+        import threading
+        def _auto_index():
+            import time as _t
+            _t.sleep(3)
+            from knowledge_base.live_stats_indexer import run as _run_indexer
+            _run_indexer(cvm_host, cvm_password)
+        threading.Thread(target=_auto_index, daemon=True).start()
+
     yield
     print("Shutting down server...")
 
@@ -169,18 +201,28 @@ def process_query(request: QueryRequest):
         t0 = time.perf_counter()
         logger.info("request query=%r", request.query[:200])
 
-        # Step 1: Check cache
-        cached = _query_cache.get(request.query)
-        if cached and not request.generate_python:
-            cached_response = dict(cached)
-            cached_response["latency_ms"] = round((time.perf_counter() - t0) * 1000, 2)
-            return QueryResponse(**cached_response)
+        # Optional per-request LLM override ("bring your own model").
+        llm_override = None
+        if request.llm_api_key:
+            llm_override = {
+                "api_key": request.llm_api_key,
+                "base_url": (request.llm_base_url or "").strip() or None,
+                "model": (request.llm_model or "").strip() or None,
+            }
+
+        # Step 1: Check cache (bypass when a custom model is used - results differ).
+        if not llm_override:
+            cached = _query_cache.get(request.query)
+            if cached and not request.generate_python:
+                cached_response = dict(cached)
+                cached_response["latency_ms"] = round((time.perf_counter() - t0) * 1000, 2)
+                return QueryResponse(**cached_response)
 
         # Step 2: Retrieve schema context (skip for fine-tuned model)
         schema_chunks = []
         selected_tuples: List[Tuple[str, str]] = []
 
-        if not config.USE_FINETUNED_MODEL:
+        if not config.USE_FINETUNED_MODEL and not getattr(config, "USE_GROUNDED_PIPELINE", False):
             schema_chunks = vectordb.retrieve_schema_chunks(request.query)
             if not schema_chunks:
                 raise HTTPException(status_code=500, detail="No schema chunks retrieved.")
@@ -196,11 +238,14 @@ def process_query(request: QueryRequest):
                         seen.add(pair)
                         selected_tuples.append(pair)
 
-        # Step 3: Single LLM call - classify intent + generate proto
+        # Step 3: Grounded generation - classify intent + generate + validate/repair
+        gen_meta: dict = {}
         try:
-            query_proto, result_entity_types, api_method = proto_response_generator.generate_proto(
+            query_proto, result_entity_types, api_method, gen_confidence = proto_response_generator.generate_proto(
                 query=request.query,
                 schema_chunks=schema_chunks,
+                llm_override=llm_override,
+                meta=gen_meta,
             )
         except ValueError as e:
             raise HTTPException(status_code=500, detail=f"Proto generation error: {str(e)}")
@@ -223,18 +268,26 @@ def process_query(request: QueryRequest):
         t_total_ms = (time.perf_counter() - t0) * 1000
         logger.info("total_ms=%.2f api=%s", t_total_ms, api_method)
 
-        # Cache result
-        _query_cache.put(request.query, {
-            "query_proto": query_proto,
-            "selected_tuples": selected_tuples,
-            "python_code": None,
-            "go_code": None,
-            "query_type": api_method,
-            "api_method": api_method,
-            "used_template": False,
-            "confidence": 1.0,
-            "latency_ms": 0.0,
-        })
+        # Which model actually produced this result (for the UI mode indicator).
+        if gen_meta.get("llm_used") == "custom":
+            llm_backend = f"custom:{gen_meta.get('model') or 'custom'}"
+        else:
+            llm_backend = f"local:{config.CHAT_MODEL}"
+
+        # Cache result (only the default local path; custom results are not cached).
+        if not llm_override:
+            _query_cache.put(request.query, {
+                "query_proto": query_proto,
+                "selected_tuples": selected_tuples,
+                "python_code": None,
+                "go_code": None,
+                "query_type": api_method,
+                "api_method": api_method,
+                "used_template": False,
+                "confidence": gen_confidence,
+                "latency_ms": 0.0,
+                "llm_backend": llm_backend,
+            })
 
         return QueryResponse(
             query_proto=query_proto,
@@ -244,8 +297,9 @@ def process_query(request: QueryRequest):
             query_type=api_method,
             api_method=api_method,
             used_template=False,
-            confidence=1.0,
+            confidence=gen_confidence,
             latency_ms=round(t_total_ms, 2),
+            llm_backend=llm_backend,
         )
 
     except HTTPException:
@@ -253,6 +307,40 @@ def process_query(request: QueryRequest):
     except Exception as e:
         logger.exception("Unhandled error")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+class LLMTestRequest(BaseModel):
+    llm_api_key: str
+    llm_base_url: Optional[str] = None
+    llm_model: Optional[str] = None
+
+
+@app.post("/llm/test")
+def test_llm(request: LLMTestRequest):
+    """Validate a user-supplied LLM endpoint/key with a tiny generation call."""
+    import llm_client
+    override = {
+        "api_key": request.llm_api_key,
+        "base_url": (request.llm_base_url or "").strip() or None,
+        "model": (request.llm_model or "").strip() or None,
+    }
+    t0 = time.perf_counter()
+    try:
+        out = llm_client.call_llm(
+            "You are a helpful assistant. Reply with exactly one word.",
+            "Reply with the single word: OK",
+            max_tokens=5,
+            override=override,
+        )
+        latency = round((time.perf_counter() - t0) * 1000, 1)
+        return {
+            "ok": True,
+            "model": override["model"] or "(endpoint default)",
+            "latency_ms": latency,
+            "sample": (out or "").strip()[:80],
+        }
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": str(e)[:300]}
 
 
 class ExecuteRequest(BaseModel):
@@ -333,10 +421,29 @@ class KBSearchRequest(BaseModel):
     query: str
     top_k: int = 5
     category: Optional[str] = None
+    # Optional "bring your own model" override (used by Deep Search synthesis).
+    llm_api_key: Optional[str] = None
+    llm_base_url: Optional[str] = None
+    llm_model: Optional[str] = None
 
 
 class KBSummarizeRequest(BaseModel):
     query: str
+    # Optional "bring your own model" override for summarization.
+    llm_api_key: Optional[str] = None
+    llm_base_url: Optional[str] = None
+    llm_model: Optional[str] = None
+
+
+def _override_from(request) -> Optional[dict]:
+    """Build an llm_override dict from a request, or None when no key is set."""
+    if getattr(request, "llm_api_key", None):
+        return {
+            "api_key": request.llm_api_key,
+            "base_url": getattr(request, "llm_base_url", None),
+            "model": getattr(request, "llm_model", None),
+        }
+    return None
 
 
 class KBRelatedFeaturesRequest(BaseModel):
@@ -352,19 +459,35 @@ def kb_search(request: KBSearchRequest):
     return {"results": results, "total": len(results), "query": request.query}
 
 
+@app.post("/kb/search-live-stats")
+def kb_search_live_stats(request: KBSearchRequest):
+    """Search ONLY live cluster stats (filtered to Live Cluster Stats category)."""
+    kb = get_kb_service()
+    results = kb.search(request.query, top_k=12, category="Live Cluster Stats")
+    return {"results": results, "total": len(results), "query": request.query}
+
+
 @app.post("/kb/summarize")
 def kb_summarize(request: KBSummarizeRequest):
     """Summarize/answer a question about IDF using the knowledge base."""
     kb = get_kb_service()
-    answer = kb.summarize(request.query)
+    answer = kb.summarize(request.query, llm_override=_override_from(request))
     return {"answer": answer, "query": request.query}
+
+
+@app.post("/kb/rephrase-query")
+def kb_rephrase_query(request: KBSummarizeRequest):
+    """Rewrite the user's question into a clearer, better-phrased question (for Glean)."""
+    kb = get_kb_service()
+    rephrased = kb.rephrase_query(request.query, llm_override=_override_from(request))
+    return {"rephrased": rephrased, "original": request.query}
 
 
 @app.post("/kb/deep-search")
 def kb_deep_search(request: KBSearchRequest):
     """Deep Search: multi-stage retrieval + synthesis using Phi-4 + nomic-embed."""
     kb = get_kb_service()
-    result = kb.deep_search(request.query)
+    result = kb.deep_search(request.query, llm_override=_override_from(request))
     return result
 
 
@@ -420,6 +543,38 @@ def kb_download_document(doc_id: str):
             return FileResponse(filepath, filename=filename, media_type="application/octet-stream")
 
     raise HTTPException(status_code=404, detail="Original file not found")
+
+
+class LiveStatsIndexRequest(BaseModel):
+    cvm_ip: str
+    password: str = "nutanix/4u"
+    port: int = 2027
+
+
+@app.post("/kb/index-live-stats")
+def kb_index_live_stats(request: LiveStatsIndexRequest):
+    """Trigger live stats crawl+index in background. Returns immediately."""
+    from knowledge_base.live_stats_indexer import run_background, get_status, _indexing_state
+    import knowledge_base.live_stats_indexer as lsi
+
+    if _indexing_state["running"]:
+        return {"success": True, "message": "Indexing already in progress", "status": get_status()}
+
+    lsi.IDF_PORT = request.port
+    run_background(request.cvm_ip, request.password)
+
+    return {
+        "success": True,
+        "message": f"Indexing started for {request.cvm_ip}:{request.port}",
+        "status": get_status(),
+    }
+
+
+@app.get("/kb/live-stats-status")
+def kb_live_stats_status():
+    """Check live stats indexing status (supports polling)."""
+    from knowledge_base.live_stats_indexer import get_status
+    return get_status()
 
 
 if __name__ == "__main__":

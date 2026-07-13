@@ -9,13 +9,104 @@ Single LLM call handles:
 No regex classification - the LLM does everything.
 """
 
+import json
+import os
 import re
 from typing import List, Optional, Tuple
 
 import config
 import llm_client
 
+# Grounded pipeline modules (Phase 1-3).
+import schema_service
+import ir_to_proto
+import ir_validator
+from query_ir import ApiMethod, QueryIR
+
 MAX_RETRIES = 2
+
+# ---------------------------------------------------------------------------
+# Grounded generation: schema grounding + few-shot exemplars
+# ---------------------------------------------------------------------------
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_TRAIN_PATH = os.path.join(_SCRIPT_DIR, "mlx_finetune_data", "train.jsonl")
+_exemplars_cache: Optional[List[dict]] = None
+
+
+def _load_exemplars() -> List[dict]:
+    """Load (user, assistant) training pairs once for few-shot retrieval."""
+    global _exemplars_cache
+    if _exemplars_cache is not None:
+        return _exemplars_cache
+    items: List[dict] = []
+    try:
+        with open(_TRAIN_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                obj = json.loads(line)
+                msgs = obj.get("messages", [])
+                if len(msgs) >= 2:
+                    user = msgs[-2].get("content", "")
+                    assistant = msgs[-1].get("content", "")
+                    if user and assistant:
+                        items.append({
+                            "user": user,
+                            "assistant": assistant,
+                            "tokens": set(re.findall(r"[a-z0-9_]+", user.lower())),
+                        })
+    except (OSError, json.JSONDecodeError):
+        pass
+    _exemplars_cache = items
+    return items
+
+
+def _retrieve_exemplars(query: str, k: int = 3) -> List[dict]:
+    """Retrieve top-k most lexically similar training exemplars (Jaccard)."""
+    items = _load_exemplars()
+    if not items:
+        return []
+    q_tokens = set(re.findall(r"[a-z0-9_]+", query.lower()))
+    if not q_tokens:
+        return items[:k]
+    scored = []
+    for it in items:
+        inter = len(q_tokens & it["tokens"])
+        if inter == 0:
+            continue
+        union = len(q_tokens | it["tokens"]) or 1
+        scored.append((inter / union, it))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [it for _, it in scored[:k]]
+
+
+def _build_grounding(query: str) -> str:
+    """
+    Build a concise grounding appendix: candidate entity types with their real
+    queryable attributes + a few retrieved exemplars. Kept short so the
+    fine-tuned model can use it without drifting from its trained behavior.
+    """
+    lines: List[str] = []
+    entities = schema_service.resolve_entity_types(query, limit=2)
+    if entities:
+        lines.append("VALID SCHEMA (use these exact names):")
+        for et in entities:
+            attrs = schema_service.attributes_for(et)
+            # Prefer indexed attributes, then fill with common ones, cap at 40.
+            indexed = schema_service.indexed_attributes(et)
+            names = list(dict.fromkeys(indexed + list(attrs.keys())))[:15]
+            if names:
+                lines.append(f"- {et}: {', '.join(names)}")
+    exemplars = _retrieve_exemplars(query, k=config.GROUNDING_FEWSHOT_K)
+    if exemplars:
+        lines.append("\nEXAMPLES:")
+        for ex in exemplars:
+            lines.append(f"Q: {ex['user']}")
+            lines.append(ex["assistant"])
+            lines.append("")
+    return "\n".join(lines).strip()
 
 UNIFIED_SYSTEM_PROMPT = """You are an expert IDF (Insights Data Fabric) query generator for Nutanix.
 
@@ -190,8 +281,8 @@ query {
 }
 
 RULE 2 - WHERE CLAUSE (filtering):
-where_clause {
-  comparison_expr {
+   where_clause {
+     comparison_expr {
     lhs { leaf { column: "FIELD_NAME" } }
     operator: kEQ           # MUST use kEQ/kNE/kGT/kGE/kLT/kLE/kLike
     rhs { leaf { value { str_value: "VALUE" } } }
@@ -330,7 +421,7 @@ query {
   where_clause {
     comparison_expr {
       lhs { leaf { column: "power_state" } }
-      operator: kEQ
+       operator: kEQ
       rhs { leaf { value { str_value: "on" } } }
     }
   }
@@ -760,16 +851,285 @@ query {
 
 def generate_proto(query: str, schema_chunks: List[dict] = None,
                   selected_entity_types: List[str] = None,
-                  selected_attributes: List[str] = None) -> Tuple[str, List[str], Optional[str]]:
+                  selected_attributes: List[str] = None,
+                  llm_override: dict = None,
+                  meta: dict = None) -> Tuple[str, List[str], Optional[str], float]:
     """
-    Generate query proto from natural language using a single LLM call.
-
-    The LLM handles classification + proto generation in one shot.
-    No regex classification needed.
+    Generate an IDF query proto from natural language.
 
     Returns:
-        Tuple of (proto_text, entity_types_found, api_method)
+        Tuple of (proto_text, entity_types_found, api_method, confidence)
+
+    `llm_override` optionally targets a user-supplied OpenAI-compatible endpoint
+    ("bring your own model"); `meta` (if given) is populated with which backend
+    actually produced the result.
+
+    Dispatches to the grounded constrained pipeline (default) or the legacy
+    regex pipeline when config.USE_GROUNDED_PIPELINE is False.
     """
+    if getattr(config, "USE_GROUNDED_PIPELINE", True):
+        return _generate_proto_grounded(query, llm_override=llm_override, meta=meta)
+    proto_text, ets, api = _generate_proto_legacy(query, schema_chunks)
+    return proto_text, ets, api, 1.0
+
+
+# ---------------------------------------------------------------------------
+# Grounded pipeline: ground -> constrained IR -> validate/repair -> render
+#                    -> single self-correct -> guaranteed minimal fallback
+# ---------------------------------------------------------------------------
+
+_GROUNDED_SYSTEM = (
+    "You are an IDF (Insights Data Fabric) query generator for Nutanix. "
+    "Given a natural language query, output the API method on line 1 as "
+    '"API: <MethodName>" then the IDF protobuf text on subsequent lines. '
+    "Use only attribute and entity-type names that exist in the provided schema."
+)
+
+# Rich, self-contained prompt for NON fine-tuned models (e.g. Ollama Phi-4-mini).
+# The fine-tuned MLX model already knows the format; a general model does not, so
+# it needs the exact IDF proto grammar + concrete examples. Kept compact (~800
+# tokens) so prompt-eval stays fast on CPU-only hosts.
+_COMPACT_SYSTEM = """You are an IDF (Insights Data Fabric) query generator for Nutanix.
+
+OUTPUT FORMAT - plain text ONLY. NO markdown, NO code fences, NO ```, NO JSON objects.
+Line 1: API: <MethodName>
+Lines 2+: the IDF protobuf text (some APIs need no body).
+
+VALID API NAMES (pick EXACTLY one, NEVER invent a name):
+GetEntitiesWithMetrics, GetEntities, GetEntityTypes, GetMetricTypes, GetMetricData,
+UpdateEntity, DeleteEntity, RegisterEntityTypes, RegisterMetricTypes, UnregisterMetricTypes,
+BatchGetEntitiesWithMetrics, BatchUpdateEntities, BatchDeleteEntities, PutMetricData,
+SpotLightSearch, GetEntitiesTrail, AttachEntity, DetachEntity, GetMasterLocation, Watch, PutEvent
+
+Reading/listing/counting/filtering entity rows uses GetEntitiesWithMetrics with this EXACT shape:
+query {
+  entity_list { entity_type_name: "<type>" }
+  where_clause { ... }        # include ONLY when filtering
+  group_by { ... }            # columns / sort / limit / aggregation
+  query_name: "auto_query"
+}
+
+FILTER (where_clause), one condition:
+where_clause { comparison_expr {
+  lhs { leaf { column: "<attr>" } }
+  operator: kEQ                              # kEQ kNE kLT kLE kGT kGE kLike kExists
+  rhs { leaf { value { str_value: "<v>" } } }   # numbers: uint64_value: N
+} }
+Two conditions (AND/OR):
+where_clause {
+  lhs { comparison_expr { ... } }
+  operator: kAnd
+  rhs { comparison_expr { ... } }
+}
+
+group_by pieces:
+  columns:     raw_columns { column: "<attr>" }
+  sort:        raw_sort_order { column: "<attr>" order: kDescending }   (also needs raw_columns + raw_limit)
+  limit/page:  raw_limit { limit: N offset: 0 }
+  COUNT rows:  group_by { raw_limit { limit: 0 } }
+  aggregate:   aggregate_columns { column: "<attr>" operator: kAvg }    (kSum kAvg kCount kMin kMax)
+
+HARD RULES: use ONLY entity/attribute names from the SCHEMA given below. Map "host"->"node".
+Operators MUST be the k-spellings (kEQ,kGT,...). NEVER use > < = != GT LT EQUALS DESCENDING.
+
+EXAMPLES:
+Q: get all VMs
+API: GetEntitiesWithMetrics
+query { entity_list { entity_type_name: "vm" } group_by { raw_columns { column: "vm_name" } } query_name: "auto_query" }
+
+Q: get VMs where power_state = on
+API: GetEntitiesWithMetrics
+query {
+  entity_list { entity_type_name: "vm" }
+  where_clause { comparison_expr { lhs { leaf { column: "power_state" } } operator: kEQ rhs { leaf { value { str_value: "on" } } } } }
+  group_by { raw_columns { column: "vm_name" } raw_columns { column: "power_state" } }
+  query_name: "auto_query"
+}
+
+Q: count powered on VMs with more than 4 vcpus
+API: GetEntitiesWithMetrics
+query {
+  entity_list { entity_type_name: "vm" }
+  where_clause {
+    lhs { comparison_expr { lhs { leaf { column: "power_state" } } operator: kEQ rhs { leaf { value { str_value: "on" } } } } }
+    operator: kAnd
+    rhs { comparison_expr { lhs { leaf { column: "num_vcpus" } } operator: kGT rhs { leaf { value { uint64_value: 4 } } } } }
+  }
+  group_by { raw_limit { limit: 0 } }
+  query_name: "auto_query"
+}
+
+Q: top 5 VMs by num_vcpus descending
+API: GetEntitiesWithMetrics
+query {
+  entity_list { entity_type_name: "vm" }
+  group_by { raw_columns { column: "vm_name" } raw_columns { column: "num_vcpus" } raw_sort_order { column: "num_vcpus" order: kDescending } raw_limit { limit: 5 offset: 0 } }
+  query_name: "auto_query"
+}
+
+Q: average memory_mb for VMs
+API: GetEntitiesWithMetrics
+query { entity_list { entity_type_name: "vm" } group_by { aggregate_columns { column: "memory_mb" operator: kAvg } } query_name: "auto_query" }
+
+Q: list metrics for entity type vm
+API: GetMetricTypes
+regex: ".*:vm"
+
+Q: describe vm entity type
+API: GetEntityTypes
+entity_type_name: "vm"
+
+Q: delete vm entity vm-test-1
+API: DeleteEntity
+entity_guid { entity_type_name: "vm" entity_id: "vm-test-1" }"""
+
+
+def _active_system_prompt(force_general: bool = False) -> str:
+    """Thin prompt for the fine-tuned model, rich grammar+examples otherwise.
+
+    `force_general` returns the rich prompt even on a fine-tuned default (used for
+    a custom override endpoint, which is a general model that needs the grammar).
+    """
+    if force_general:
+        return _COMPACT_SYSTEM
+    return _GROUNDED_SYSTEM if getattr(config, "USE_FINETUNED_MODEL", False) else _COMPACT_SYSTEM
+
+
+def _ir_from_text(raw: str, query: str) -> QueryIR:
+    """
+    Parse a single model response into a QueryIR, handling BOTH shapes from one
+    call: a constrained JSON IR (when Outlines is active) OR the trained
+    "API: <method>\\n<proto>" text (when it is not). This keeps the pipeline to a
+    single model call, which matters a lot for latency.
+    """
+    raw = (raw or "").strip()
+
+    # Try JSON IR first (constrained decoding path).
+    candidate = raw
+    if candidate.startswith("```"):
+        candidate = candidate.strip("`")
+        candidate = candidate[candidate.find("{"):] if "{" in candidate else candidate
+    if candidate.lstrip().startswith("{"):
+        try:
+            data = json.loads(candidate)
+            if isinstance(data, dict) and ("api_method" in data or "entity_type" in data):
+                return QueryIR.from_loose(data)
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # Otherwise treat it as trained proto-format output.
+    api_method, proto_text = _parse_llm_response(raw)
+    api_method = _override_api_from_query(query, api_method) or api_method or "GetEntitiesWithMetrics"
+    proto_text = _reconstruct_flat_proto(proto_text, api_method, query)
+    return ir_validator.proto_to_ir(proto_text, api_method)
+
+
+def _generate_one(grounded_user: str, query: str,
+                  llm_override: dict = None, meta: dict = None) -> QueryIR:
+    """Single model call -> QueryIR (constrained JSON or proto, whichever comes back).
+
+    If `llm_override` targets a custom endpoint, use it; on failure fall back to
+    the local default so a bad key/URL never breaks the query. `meta['llm_used']`
+    records which backend produced the result.
+    """
+    use_override = bool(llm_override and llm_override.get("api_key"))
+
+    if use_override:
+        try:
+            raw = llm_client.call_llm(
+                _active_system_prompt(force_general=True), grounded_user,
+                max_tokens=config.PROTO_MAX_TOKENS, override=llm_override,
+            )
+            if meta is not None:
+                meta["llm_used"] = "custom"
+                meta["model"] = llm_override.get("model")
+            return _ir_from_text(raw, query)
+        except Exception as e:  # noqa: BLE001
+            print(f"[Proto Gen] custom endpoint failed ({e}); falling back to local")
+            if meta is not None:
+                meta["llm_used"] = "local"
+                meta["custom_error"] = str(e)[:200]
+
+    system = _active_system_prompt()
+    if getattr(config, "USE_CONSTRAINED_DECODING", True):
+        try:
+            raw = llm_client.call_llm_json(
+                system, grounded_user, guided_schema="QueryIR",
+                max_tokens=config.PROTO_MAX_TOKENS,
+            )
+            return _ir_from_text(raw, query)
+        except Exception as e:  # noqa: BLE001
+            print(f"[Proto Gen] guided call failed, using plain generation: {e}")
+    raw = llm_client.call_llm(system, grounded_user,
+                              max_tokens=config.PROTO_MAX_TOKENS)
+    return _ir_from_text(raw, query)
+
+
+def _generate_proto_grounded(query: str, llm_override: dict = None,
+                             meta: dict = None) -> Tuple[str, List[str], Optional[str], float]:
+    grounding = _build_grounding(query)
+    grounded_user = query if not grounding else f"{query}\n\n{grounding}"
+
+    print(f"[Proto Gen] Grounded generation: {query[:80]}")
+
+    # 1) Primary generation: ONE model call (JSON IR or proto, parsed uniformly).
+    ir = _generate_one(grounded_user, query, llm_override=llm_override, meta=meta)
+
+    # Apply keyword-based API override (cheap, high-precision routing).
+    overridden = _override_api_from_query(query, ir.api_method.value)
+    if overridden and overridden in {m.value for m in ApiMethod}:
+        ir.api_method = ApiMethod(overridden)
+
+    # 2) Validate + repair against the real schema.
+    report = ir_validator.validate_and_repair(ir)
+
+    # 3) Self-correct ONCE if the entity type is still unknown/missing.
+    needs_fix = (ir.api_method in (ApiMethod.GetEntitiesWithMetrics,
+                                   ApiMethod.GetEntities, ApiMethod.GetMetricData)
+                 and (not ir.entity_type or not schema_service.has_entity(ir.entity_type)))
+    if needs_fix:
+        valid_entities = ", ".join(schema_service.resolve_entity_types(query, limit=5)) or "vm, node, cluster, disk"
+        correction = (
+            f"{query}\n\nThe entity type must be one of the REAL types below. "
+            f"Most likely: {valid_entities}.\n{grounding}"
+        )
+        try:
+            ir2 = _generate_one(correction, query, llm_override=llm_override, meta=meta)
+            ov2 = _override_api_from_query(query, ir2.api_method.value)
+            if ov2 in {m.value for m in ApiMethod}:
+                ir2.api_method = ApiMethod(ov2)
+            report2 = ir_validator.validate_and_repair(ir2)
+            if ir2.entity_type and schema_service.has_entity(ir2.entity_type):
+                ir, report = ir2, report2
+        except Exception as e:  # noqa: BLE001
+            print(f"[Proto Gen] self-correct failed: {e}")
+
+    # 4) Guaranteed fallback: ensure a usable entity type so render never empties.
+    confidence = report.confidence
+    if ir.api_method in (ApiMethod.GetEntitiesWithMetrics, ApiMethod.GetEntities,
+                         ApiMethod.GetMetricData) and (
+            not ir.entity_type or not schema_service.has_entity(ir.entity_type)):
+        guess = schema_service.resolve_entity_types(query, limit=1)
+        ir.entity_type = guess[0] if guess else "vm"
+        confidence = min(confidence, 0.45)
+        print(f"[Proto Gen] fallback entity -> {ir.entity_type}")
+
+    # 5) Deterministic render (always structurally valid).
+    proto_text = ir_to_proto.render(ir)
+
+    entity_types = [ir.entity_type] if ir.entity_type else re.findall(
+        r'entity_type_name\s*:\s*"([^"]+)"', proto_text)
+    entity_types = list(dict.fromkeys(entity_types))
+
+    if report.fixes:
+        print(f"[Proto Gen] repaired ({len(report.fixes)} fix): {report.fixes}")
+    print(f"[Proto Gen] api={ir.api_method.value} confidence={confidence:.2f}")
+    return proto_text, entity_types, ir.api_method.value, round(confidence, 2)
+
+
+def _generate_proto_legacy(query: str, schema_chunks: List[dict] = None
+                           ) -> Tuple[str, List[str], Optional[str]]:
+    """Original single-call + regex-normalization pipeline (kept behind flag)."""
     if config.USE_FINETUNED_MODEL:
         user_msg = query
     else:
@@ -786,24 +1146,18 @@ Generate the IDF proto. Output "API: <Method>" on line 1, then the proto text.""
     print(f"[Proto Gen] LLM response ({len(content)} chars)")
 
     api_method, proto_text = _parse_llm_response(content)
-
-    # Override API if query keywords strongly indicate a different intent
     api_method = _override_api_from_query(query, api_method)
 
     if config.USE_FINETUNED_MODEL:
-        # Pre-normalization: detect flat/JSON-like output and reconstruct proto
         proto_text = _reconstruct_flat_proto(proto_text, api_method, query)
-
         is_valid, error = _validate_proto(proto_text, api_method)
         if not is_valid:
             print(f"[Proto Gen] Validation note: {error} (applying normalization)")
-
         if api_method == "GetEntitiesWithMetrics":
             proto_text = _normalize_get_entities_proto(proto_text, query)
         else:
             proto_text = _normalize_other_proto(proto_text, api_method, query)
     else:
-        # Non-finetuned model: full retry loop + heavy normalization
         is_valid, error = _validate_proto(proto_text, api_method)
         retry_count = 0
         while not is_valid and retry_count < MAX_RETRIES:
@@ -821,21 +1175,16 @@ Fix the issue. Output "API: <Method>" on line 1, then corrected proto text."""
             api_method, proto_text = _parse_llm_response(content)
             api_method = _override_api_from_query(query, api_method)
             is_valid, error = _validate_proto(proto_text, api_method)
-
         if not is_valid:
             print(f"[Proto Gen] WARNING: {error}")
-
         api_method = _override_api_from_query(query, api_method)
-
         if api_method == "GetEntitiesWithMetrics":
             proto_text = _normalize_get_entities_proto(proto_text, query)
         else:
             proto_text = _normalize_other_proto(proto_text, api_method, query)
 
-    # Extract entity types from proto
     entity_type_matches = re.findall(r'entity_type_name\s*:\s*"([^"]+)"', proto_text)
     result_entity_types = list(set(entity_type_matches)) if entity_type_matches else []
-
     return proto_text, result_entity_types, api_method
 
 
@@ -905,6 +1254,12 @@ def _reconstruct_flat_proto(proto_text: str, api_method: str, original_query: st
 def _override_api_from_query(query: str, detected_api: str) -> str:
     """Override LLM's API classification when query keywords strongly indicate a different intent."""
     ql = query.lower()
+
+    # Force GetEntitiesWithMetrics for common read queries misclassified as SpotLightSearch
+    if detected_api == "SpotLightSearch":
+        if re.search(r'\b(alert|vm|disk|host|cluster|container|node|subnet|image|volume_group)\b', ql):
+            if re.search(r'\b(get|list|show|find|fetch|recent|all|where|filter|sort)\b', ql):
+                return "GetEntitiesWithMetrics"
 
     # GetEntitiesWithMetrics overrides - detect misclassification
     if detected_api == "GetEntitiesWithMetrics":
@@ -1461,6 +1816,51 @@ def _normalize_other_proto(proto_text: str, api_method: str, original_query: str
 def _normalize_get_entities_proto(proto_text: str, original_query: str = "") -> str:
     """Post-process GetEntitiesWithMetrics proto to fix common LLM formatting errors."""
     s = proto_text.strip()
+
+    # Fix malformed output where entity_type_name/metric_name appear at root before query {}
+    if re.match(r'^entity_type_name:', s) or re.match(r'^metric_name:', s):
+        query_block = re.search(r'(query\s*\{.*)', s, re.DOTALL)
+        if query_block:
+            s = query_block.group(1)
+        else:
+            et = re.search(r'entity_type_name:\s*"([^"]+)"', s)
+            metrics = re.findall(r'metric_name:\s*"([^"]+)"', s)
+            entity_type = et.group(1) if et else "vm"
+            cols = '\n    '.join(f'raw_columns {{ column: "{m}" }}' for m in metrics) if metrics else ''
+            ql = original_query.lower()
+            where = ''
+            filter_match = re.search(r'where\s+(\w+)\s+(?:is|=|equals?)\s+(\w+)', ql, re.IGNORECASE)
+            if filter_match:
+                col = filter_match.group(1)
+                val = filter_match.group(2)
+                where = f'''  where_clause {{
+    comparison_expr {{
+      lhs {{ leaf {{ column: "{col}" }} }}
+      operator: kEQ
+      rhs {{ leaf {{ value {{ str_value: "{val}" }} }} }}
+    }}
+  }}
+'''
+            s = f'query {{\n  entity_list {{ entity_type_name: "{entity_type}" }}\n{where}  group_by {{\n    {cols}\n  }}\n  query_name: "auto_query"\n}}'
+
+    # Fix QueryOrderBy field names: LLM generates "column:"/"order:" instead of
+    # the correct "sort_column:"/"sort_order:" within raw_sort_order blocks.
+    def _fix_sort_order_fields(m):
+        block = m.group(0)
+        block = re.sub(r'\bcolumn\s*:', 'sort_column:', block)
+        block = re.sub(r'(?<!\bsort_)\border\s*:', 'sort_order:', block)
+        return block
+    s = re.sub(r'raw_sort_order\s*\{[^}]*\}', _fix_sort_order_fields, s, flags=re.DOTALL)
+    s = re.sub(r'group_sort_order\s*\{[^}]*\}', _fix_sort_order_fields, s, flags=re.DOTALL)
+
+    # Fix power_state case: IDF stores lowercase ("on", "off") but LLM often generates uppercase
+    def _fix_power_state_case(m):
+        val = m.group(1)
+        if val.upper() in ("ON", "OFF", "PAUSED", "SUSPENDED"):
+            return f'str_value: "{val.lower()}"'
+        return m.group(0)
+    if 'power_state' in s:
+        s = re.sub(r'str_value:\s*"(ON|OFF|PAUSED|SUSPENDED)"', _fix_power_state_case, s, flags=re.IGNORECASE)
 
     # Fix nested group_by blocks: LLM sometimes generates
     #   group_by { raw_columns { column: "a" } group_by { raw_columns { column: "b" } ... } }

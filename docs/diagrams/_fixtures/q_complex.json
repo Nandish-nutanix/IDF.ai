@@ -1,0 +1,48 @@
+{
+  "success": true,
+  "entity_type": "vm",
+  "intent": "GetEntitiesWithMetrics",
+  "attributes": null,
+  "operators": null,
+  "protobuf_json": {
+    "query_proto": "query {\n  entity_list { entity_type_name: \"vm\" }\n  where_clause {\n    and_list {\n      comparison_expr { lhs { leaf { column: \"power_state\" } } operator: kEQ rhs { leaf { value { str_value: \"on\" } } } }\n      comparison_expr { lhs { leaf { column: \"num_vcpus\" } } operator: kGT rhs { leaf { value { int64_value: 8 } } } }\n      comparison_expr { lhs { leaf { column: \"mem_gb\" } } operator: kGT rhs { leaf { value { int64_value: 16 } } } }\n    }\n  }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"host\" }\n    raw_columns { column: \"mem_gb\" }\n    raw_sort_order { sort_column: \"create_time_usecs\" sort_order: kDescending }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"auto_query\"\n}"
+  },
+  "python_code": "# Query: list powered-on vms with >8 vcpus and memory over 16gb, show name, host and project owner, newest 10\nimport sys\nsys.path.insert(0, \"/home/nutanix/cluster/bin\")\nimport env\nimport gflags\ngflags.FLAGS([])\nfrom google.protobuf.text_format import Merge\nfrom insights_interface.insights_interface_pb2 import GetEntitiesWithMetricsArg\nfrom insights_interface.insights_interface import InsightsInterface, InsightsInterfaceError\n\ninsights_interface = InsightsInterface(\"127.0.0.1\", \"2027\")\narg = GetEntitiesWithMetricsArg()\nquery = '''\nquery {\n  entity_list { entity_type_name: \"vm\" }\n  where_clause {\n    and_list {\n      comparison_expr { lhs { leaf { column: \"power_state\" } } operator: kEQ rhs { leaf { value { str_value: \"on\" } } } }\n      comparison_expr { lhs { leaf { column: \"num_vcpus\" } } operator: kGT rhs { leaf { value { int64_value: 8 } } } }\n      comparison_expr { lhs { leaf { column: \"mem_gb\" } } operator: kGT rhs { leaf { value { int64_value: 16 } } } }\n    }\n  }\n  group_by {\n    raw_columns { column: \"vm_name\" }\n    raw_columns { column: \"host\" }\n    raw_columns { column: \"mem_gb\" }\n    raw_sort_order { sort_column: \"create_time_usecs\" sort_order: kDescending }\n    raw_limit { limit: 10 }\n  }\n  query_name: \"auto_query\"\n}\n'''\nMerge(query, arg)\ntry:\n    ret = insights_interface.GetEntitiesWithMetrics(arg)\n    print(ret)\nexcept InsightsInterfaceError as ex:\n    print(\"Error Message: \" + ex.message)\n",
+  "cpp_code": null,
+  "java_code": null,
+  "go_code": null,
+  "error": null,
+  "confidence_scores": {
+    "classification": 0.61
+  },
+  "rpc": null,
+  "query_type": "GetEntitiesWithMetrics",
+  "api_method": "GetEntitiesWithMetrics",
+  "used_template": false,
+  "latency_ms": 91230.4,
+  "validation_warnings": [
+    "column 'mem_gb' not in schema for entity 'vm'"
+  ],
+  "pipeline": [
+    {
+      "name": "Ground schema",
+      "status": "done"
+    },
+    {
+      "name": "Phi-4 draft",
+      "status": "done"
+    },
+    {
+      "name": "Validate",
+      "status": "warn"
+    },
+    {
+      "name": "Repair (GRPO reward)",
+      "status": "pending"
+    },
+    {
+      "name": "Valid proto",
+      "status": "pending"
+    }
+  ]
+}

@@ -266,14 +266,14 @@ def generate_python_code(query_proto: str, natural_language_query: str = "",
 
     Auto-detects the API method from proto structure if api_method is not provided.
     Uses the exact same pattern as the Try Me Editor for all supported APIs.
-
+    
     Args:
         query_proto: Query proto in protobuf text format
         natural_language_query: Original natural language query (for comment)
         idf_ip: IDF instance IP
         idf_port: IDF instance port
         api_method: Explicit API method name (auto-detected if None)
-
+    
     Returns:
         Complete executable Python code string
     """

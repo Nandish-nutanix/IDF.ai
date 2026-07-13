@@ -1,0 +1,16 @@
+flowchart LR
+  tmpl[(".template schema<br/>702 entity types")] --> svc["schema_service"]
+  svc --> gen["generate_training_data.py<br/>(real attrs + grounding + 21-API balance)"]
+  gen --> data[("mlx_finetune_data_grounded<br/>train / valid")]
+  base["mlx-community/phi-4-4bit"] --> lora["LoRA fine-tune<br/>(run_finetune.py)"]
+  data --> lora
+  lora --> fused["phi4_idf_fused"]
+  fused --> grpo["GRPO RL<br/>(grpo_train.py, best-of-N)"]
+  reward["schema-aware reward<br/>(ir_validator + schema_service)"] --- grpo
+  grpo --> fusedrl["phi4_idf_fused_rl"]
+  fusedrl --> serve["MLX server :8090<br/>(constrained decoding)"]
+
+  classDef store fill:#374151,stroke:#1f2937,color:#fff;
+  classDef phi fill:#6d28d9,stroke:#4c1d95,color:#fff;
+  class tmpl,data,fused,fusedrl store;
+  class lora,grpo,serve phi;

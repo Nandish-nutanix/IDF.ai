@@ -1,0 +1,27 @@
+{
+  "measured_mode": "simulated",
+  "n_cases": 30,
+  "generated_at": "2026-06-25 14:18:06",
+  "variants": {
+    "baseline_legacy": {
+      "variant": "Baseline (legacy regex)",
+      "n": 30,
+      "structural_valid_pct": 93.3,
+      "api_accuracy": 100.0,
+      "entity_accuracy": 13.3,
+      "column_validity_pct": 0.0,
+      "loose_match_pct": 13.3,
+      "latency_ms": 0.2
+    },
+    "grounded": {
+      "variant": "Grounded (validate+repair)",
+      "n": 30,
+      "structural_valid_pct": 93.3,
+      "api_accuracy": 100.0,
+      "entity_accuracy": 96.7,
+      "column_validity_pct": 82.6,
+      "loose_match_pct": 93.3,
+      "latency_ms": 11.6
+    }
+  }
+}

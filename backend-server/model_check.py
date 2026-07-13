@@ -14,10 +14,19 @@ import requests
 import config
 
 
+def _ollama_native() -> str:
+    """Ollama base URL for native (/api/*) endpoints, without a trailing /v1."""
+    base = getattr(config, "OLLAMA_NATIVE_URL", None) or config.OLLAMA_BASE_URL
+    base = base.rstrip("/")
+    if base.endswith("/v1"):
+        base = base[:-3]
+    return base
+
+
 def check_ollama_health() -> bool:
     """Check if Ollama is running and reachable."""
     try:
-        url = f"{config.OLLAMA_BASE_URL}/api/tags"
+        url = f"{_ollama_native()}/api/tags"
         response = requests.get(url, timeout=5)
         return response.status_code == 200
     except requests.RequestException:
@@ -27,7 +36,7 @@ def check_ollama_health() -> bool:
 def list_available_models() -> List[str]:
     """Get list of models currently pulled in Ollama."""
     try:
-        url = f"{config.OLLAMA_BASE_URL}/api/tags"
+        url = f"{_ollama_native()}/api/tags"
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
@@ -56,7 +65,7 @@ def pull_model(model_name: str) -> bool:
     """Attempt to pull a model from Ollama registry."""
     print(f"[Model Check] Pulling model: {model_name} (this may take a while)...")
     try:
-        url = f"{config.OLLAMA_BASE_URL}/api/pull"
+        url = f"{_ollama_native()}/api/pull"
         response = requests.post(
             url,
             json={"name": model_name, "stream": False},
@@ -103,7 +112,7 @@ def verify_models(auto_pull: bool = True) -> Tuple[bool, List[str]]:
             issues.append(
                 f"MLX model server not reachable at {config.MLX_SERVER_URL}. "
                 f"Start it with: cd backend-server && python3 -m mlx_lm server "
-                f"--model ./idf_query_fused --port 8090"
+                f"--model ./phi4_idf_fused --port 8090"
             )
             return False, issues
 

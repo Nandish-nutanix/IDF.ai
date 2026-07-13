@@ -23,11 +23,33 @@ RAW_DOCS_DIR = os.path.join(KB_DIR, "raw_docs")
 INDEX_PATH = os.path.join(KB_DIR, "doc_index.json")
 
 OLLAMA_EMBED_URL = "http://localhost:11434/api/embeddings"
-OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate"
-MLX_CHAT_URL = "http://localhost:8090/v1/chat/completions"
 EMBED_MODEL = "nomic-embed-text"
-SUMMARIZE_MODEL = "qwen2.5-coder:7b-instruct"
-PHI4_CHAT_URL = "http://localhost:8090/v1/chat/completions"
+
+# Chat/summarization backend is resolved from the shared server config so the KB
+# uses whatever LLM is actually available (MLX Phi-4 when up, else the Ollama
+# fallback). This keeps the Knowledge Base answering even when MLX is down.
+try:
+    import config as _server_config
+    CHAT_URL = _server_config.API_BASE_URL.rstrip("/") + "/chat/completions"
+    SUMMARIZE_MODEL = _server_config.CHAT_MODEL
+    CHAT_API_KEY = getattr(_server_config, "API_KEY", "") or ""
+    CHAT_TIMEOUT = getattr(_server_config, "LLM_TIMEOUT", 120)
+except Exception:  # noqa: BLE001 - standalone import fallback
+    CHAT_URL = "http://localhost:8090/v1/chat/completions"
+    SUMMARIZE_MODEL = "phi4_idf_fused"
+    CHAT_API_KEY = ""
+    CHAT_TIMEOUT = 120
+
+# Back-compat aliases (older code referenced these names).
+MLX_CHAT_URL = CHAT_URL
+PHI4_CHAT_URL = CHAT_URL
+
+
+def _chat_headers():
+    h = {"Content-Type": "application/json"}
+    if CHAT_API_KEY and CHAT_API_KEY != "ollama":
+        h["Authorization"] = f"Bearer {CHAT_API_KEY}"
+    return h
 
 # Ground truth definitions for critical IDF concepts.
 # These are injected into the summarization prompt to prevent hallucination.
@@ -178,14 +200,70 @@ class KnowledgeBaseService:
         try:
             resp = requests.post(
                 OLLAMA_EMBED_URL,
-                json={"model": EMBED_MODEL, "prompt": text[:2000]},
-                timeout=10,
+                json={"model": EMBED_MODEL, "prompt": text[:2000], "keep_alive": "1h"},
+                timeout=60,
             )
             if resp.status_code == 200:
                 return resp.json()["embedding"]
         except Exception:
             pass
         return None
+
+    def _chat_completion(self, messages: List[Dict], max_tokens: int = 500,
+                         temperature: float = 0.3, llm_override: Optional[Dict] = None) -> str:
+        """POST a chat/completions request and return the message content.
+
+        When ``llm_override`` carries an api_key ("bring your own model") the
+        call targets that user-supplied OpenAI-compatible endpoint; otherwise it
+        uses the local default summarization backend.
+        """
+        use_override = bool(llm_override and llm_override.get("api_key"))
+        effective_max = max_tokens
+        if use_override:
+            base = (llm_override.get("base_url") or "").strip().rstrip("/")
+            if not base:
+                base = CHAT_URL.rsplit("/chat/completions", 1)[0]
+            url = base + "/chat/completions"
+            model = (llm_override.get("model") or "").strip() or SUMMARIZE_MODEL
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {llm_override['api_key']}",
+            }
+            # Remote models (especially large reasoning models) can be slow.
+            timeout = 240
+            # Reasoning models spend tokens "thinking" before the final answer;
+            # give them headroom so the answer isn't truncated mid-reasoning.
+            effective_max = max(max_tokens + 1500, 1800)
+        else:
+            url = CHAT_URL
+            model = SUMMARIZE_MODEL
+            headers = _chat_headers()
+            timeout = max(CHAT_TIMEOUT, 180)
+
+        verify_ssl = not ("localhost" in url or "127.0.0.1" in url)
+        resp = requests.post(
+            url,
+            headers=headers,
+            json={
+                "model": model,
+                "messages": messages,
+                "max_tokens": effective_max,
+                "temperature": temperature,
+            },
+            timeout=timeout,
+            verify=verify_ssl,
+        )
+        resp.raise_for_status()
+        message = resp.json().get("choices", [{}])[0].get("message", {}) or {}
+        content = (message.get("content") or "").strip()
+        # Some reasoning models (e.g. nemotron) return the chain-of-thought in a
+        # separate "reasoning_content" field and the final answer in "content".
+        # If content is empty (answer was short/truncated), fall back to it.
+        if not content:
+            content = (message.get("reasoning_content") or "").strip()
+        # Strip any <think>...</think> block that leaked into the content.
+        content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+        return content
 
     def search(self, query: str, top_k: int = 8, category: Optional[str] = None) -> List[Dict]:
         """
@@ -222,31 +300,39 @@ class KnowledgeBaseService:
                 distances,
             )):
                 doc_id = meta.get("doc_id", "")
-                if doc_id in seen_docs and len(output) >= top_k // 2:
+                cat = meta.get("category", "")
+                # Don't dedup live stats - each chunk is independently valuable
+                is_live = cat == "Live Cluster Stats"
+                if not is_live and doc_id in seen_docs and len(output) >= top_k // 2:
                     continue
                 seen_docs.add(doc_id)
 
                 score = max(0.0, 1.0 - (abs(dist) / (max_dist * 1.5))) if max_dist > 0 else 0.5
-                output.append({
+                result_entry = {
                     "rank": len(output) + 1,
                     "text": doc,
                     "filename": meta.get("filename", ""),
-                    "category": meta.get("category", ""),
+                    "category": cat,
                     "features": json.loads(meta.get("features", "[]")),
                     "relevance_score": round(score, 4),
                     "chunk_index": meta.get("chunk_index", 0),
                     "total_chunks": meta.get("total_chunks", 1),
                     "doc_id": doc_id,
-                })
+                }
+                if is_live:
+                    result_entry["endpoint"] = meta.get("endpoint", "")
+                    result_entry["cluster_ip"] = meta.get("cluster_ip", "")
+                output.append(result_entry)
                 if len(output) >= top_k:
                     break
 
         return output
 
-    def summarize(self, query: str, context_chunks: Optional[List[str]] = None) -> str:
+    def summarize(self, query: str, context_chunks: Optional[List[str]] = None,
+                  llm_override: Optional[Dict] = None) -> str:
         """
         Summarize/answer a question about IDF using knowledge base context.
-        Uses Ollama general-purpose model (not the fine-tuned proto model).
+        Uses the local default model, or a user-supplied model via ``llm_override``.
         """
         if not context_chunks:
             results = self.search(query, top_k=10)
@@ -272,65 +358,78 @@ CRITICAL RULES:
 {IDF_GROUND_TRUTH}
 
 DOCUMENTATION CONTEXT (from indexed internal documents):
-{context[:7000]}
+{context[:5000]}
 
 QUESTION: {query}
 
 Answer (use markdown, be definitive, cite sources when possible, NEVER invent information not in context):"""
 
-        # Use Microsoft Phi-4 via MLX server (approved model)
+        # Local default model, or a user-supplied model when llm_override is set.
         try:
-            system_msg = """You are a senior Nutanix IDF engineer. Answer questions using ONLY the provided documentation context. Use markdown formatting with headers, bold, bullet points, and code blocks. Be definitive and authoritative. NEVER invent information not in the context. Cite source documents when possible."""
-            user_msg = f"""Documentation context:
+            system_msg = """You are a technical writer for the Nutanix IDF team. Your job is to REPHRASE the provided documentation into clear, well-written, easy-to-read language. Do NOT add analysis, opinions, or any facts that are not present in the documentation. Do NOT invent field names, APIs, or behaviors. Keep it faithful to the source, only improve the wording, structure, and readability. Use light markdown (short paragraphs, bullet points, **bold** for key terms)."""
+            user_msg = f"""Documentation:
 {context[:6000]}
 
-Question: {query}
+Rephrase the documentation above into clear, well-written language relevant to: "{query}"
 
-Provide a comprehensive, well-structured answer using the documentation above:"""
-            resp = requests.post(
-                PHI4_CHAT_URL,
-                json={
-                    "model": "phi4_idf_fused",
-                    "messages": [
-                        {"role": "system", "content": system_msg},
-                        {"role": "user", "content": user_msg},
-                    ],
-                    "max_tokens": 1200,
-                    "temperature": 0.3,
-                },
-                timeout=150,
+Rephrased version (faithful to the source, just better worded):"""
+            answer = self._chat_completion(
+                [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": user_msg},
+                ],
+                max_tokens=500,
+                temperature=0.3,
+                llm_override=llm_override,
             )
-            if resp.status_code == 200:
-                data = resp.json()
-                answer = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-                if answer and len(answer) > 20:
-                    return answer
-                print(f"  [Summarize] Phi-4 returned short/empty: {answer[:100]}")
+            if answer and len(answer) > 20:
+                return answer
+            print(f"  [Summarize] LLM returned short/empty: {answer[:100]}")
         except requests.exceptions.Timeout:
-            print("  [Summarize] Phi-4 timed out (150s)")
+            print("  [Summarize] LLM timed out")
+            return "Summarization timed out. Please retry."
         except Exception as e:
-            print(f"  [Summarize] Phi-4 error: {e}")
-
-        # Fallback to Ollama
-        try:
-            resp = requests.post(
-                OLLAMA_GENERATE_URL,
-                json={
-                    "model": SUMMARIZE_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0.2, "num_predict": 1200},
-                },
-                timeout=120,
-            )
-            if resp.status_code == 200:
-                answer = resp.json().get("response", "").strip()
-                if answer:
-                    return answer
-        except Exception as e:
+            print(f"  [Summarize] LLM error: {e}")
             return f"Summarization failed: {e}"
 
-        return "Summarization service unavailable."
+        return "Summarization service unavailable (LLM backend not reachable)."
+
+    def rephrase_query(self, query: str, llm_override: Optional[Dict] = None) -> str:
+        """Rewrite the user's question into a single, clearer, better-phrased question.
+
+        Used to produce a clean query the user can copy and search on Glean.
+        Returns just the reworded question (falls back to the original on error).
+        """
+        query = (query or "").strip()
+        if not query:
+            return ""
+        try:
+            system_msg = (
+                "You rewrite short technical questions about Nutanix IDF (Insights Data "
+                "Fabric) into a single, clear, well-phrased question. Return ONLY the "
+                "rewritten question on one line, with no preamble, quotes, bullet points, "
+                "or explanation. Keep it concise, specific, and search-friendly."
+            )
+            user_msg = f"Rewrite this into one clear, well-phrased question:\n\n{query}"
+            out = self._chat_completion(
+                [
+                    {"role": "system", "content": system_msg},
+                    {"role": "user", "content": user_msg},
+                ],
+                max_tokens=80,
+                temperature=0.3,
+                llm_override=llm_override,
+            )
+            out = (out or "").strip()
+            # Keep only the first non-empty line and strip wrapping quotes.
+            for line in out.splitlines():
+                line = line.strip().strip('"').strip("'").strip()
+                if line:
+                    return line
+            return query
+        except Exception as e:
+            print(f"  [Rephrase] error: {e}")
+            return query
 
     def get_related_features(self, query: str, api_method: Optional[str] = None) -> List[Dict]:
         """
@@ -477,29 +576,18 @@ Provide a comprehensive, well-structured answer using the documentation above:""
     # Uses ONLY: Microsoft Phi-4 (MLX) + nomic-embed-text (Ollama)
     # ========================================================================
 
-    def _phi4_chat(self, messages: List[Dict], max_tokens: int = 600, temperature: float = 0.3) -> str:
-        """Call local Microsoft Phi-4 via MLX server."""
+    def _phi4_chat(self, messages: List[Dict], max_tokens: int = 600, temperature: float = 0.3,
+                   llm_override: Optional[Dict] = None) -> str:
+        """Call the summarization LLM (local default, or a user-supplied model)."""
         try:
-            resp = requests.post(
-                PHI4_CHAT_URL,
-                json={
-                    "model": "phi4_idf_fused",
-                    "messages": messages,
-                    "max_tokens": max_tokens,
-                    "temperature": temperature,
-                },
-                timeout=180,
+            return self._chat_completion(
+                messages, max_tokens=max_tokens, temperature=temperature,
+                llm_override=llm_override,
             )
-            if resp.status_code == 200:
-                data = resp.json()
-                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-                return content.strip()
-            else:
-                print(f"  [DeepSearch] Phi-4 returned status {resp.status_code}: {resp.text[:200]}")
         except requests.exceptions.Timeout:
-            print("  [DeepSearch] Phi-4 call timed out (180s)")
+            print("  [DeepSearch] LLM call timed out")
         except Exception as e:
-            print(f"  [DeepSearch] Phi-4 call failed: {e}")
+            print(f"  [DeepSearch] LLM call failed: {e}")
         return ""
 
     def _multi_embed_search(self, queries: List[str], top_k_per_query: int = 12) -> List[Dict]:
@@ -548,16 +636,15 @@ Provide a comprehensive, well-structured answer using the documentation above:""
         ranked = sorted(all_results.values(), key=lambda x: x["rrf_score"], reverse=True)
         return ranked
 
-    def deep_search(self, query: str) -> Dict:
+    def deep_search(self, query: str, llm_override: Optional[Dict] = None) -> Dict:
         """
-        Deep Search: 6-stage pipeline for comprehensive, accurate answers.
+        Deep Search: 5-stage pipeline for comprehensive, accurate answers.
 
-        Stage 1: Query Expansion (Phi-4 generates sub-queries)
+        Stage 1: Query Expansion (Phi-4 generates 2 sub-queries)
         Stage 2: Multi-Pass Retrieval (nomic-embed across sub-queries)
         Stage 3: Deduplicate & Re-rank (RRF + cross-query boost)
         Stage 4: Relevance Filter (Phi-4 scores chunks)
         Stage 5: Synthesis (Phi-4 generates comprehensive answer)
-        Stage 6: Self-Verification (Phi-4 checks for hallucinations)
         """
         stages = []
 
@@ -565,22 +652,22 @@ Provide a comprehensive, well-structured answer using the documentation above:""
         stages.append({"stage": 1, "name": "Query Expansion", "status": "running"})
 
         expansion_prompt = [
-            {"role": "system", "content": "You are an IDF (Insights Data Fabric) expert. Given a user question, generate 4 diverse search queries that would retrieve different relevant documents. Each query should approach the topic from a different angle (architecture, API usage, error handling, related concepts). Return ONLY the queries, one per line, no numbering."},
-            {"role": "user", "content": f"Question: {query}\n\nGenerate 4 diverse search queries:"}
+            {"role": "system", "content": "You are an IDF (Insights Data Fabric) expert. Given a user question, generate 2 alternative search queries that approach the topic from different angles. Return ONLY the queries, one per line, no numbering."},
+            {"role": "user", "content": f"Question: {query}\n\nGenerate 2 alternative search queries:"}
         ]
-        expansion_result = self._phi4_chat(expansion_prompt, max_tokens=200, temperature=0.5)
+        expansion_result = self._phi4_chat(expansion_prompt, max_tokens=100, temperature=0.5, llm_override=llm_override)
         sub_queries = [q.strip().strip('"').strip("'") for q in expansion_result.split('\n') if q.strip() and len(q.strip()) > 10]
         if not sub_queries:
             sub_queries = [query]
-        sub_queries = [query] + sub_queries[:4]
+        sub_queries = [query] + sub_queries[:2]
 
         stages[-1]["status"] = "done"
-        stages[-1]["detail"] = f"{len(sub_queries)} sub-queries generated"
+        stages[-1]["detail"] = f"{len(sub_queries)} search angles"
 
         # ---- STAGE 2: Multi-Pass Retrieval ----
         stages.append({"stage": 2, "name": "Multi-Pass Retrieval", "status": "running"})
 
-        all_chunks = self._multi_embed_search(sub_queries, top_k_per_query=12)
+        all_chunks = self._multi_embed_search(sub_queries, top_k_per_query=8)
 
         stages[-1]["status"] = "done"
         stages[-1]["detail"] = f"{len(all_chunks)} candidate chunks from {len(sub_queries)} queries"
@@ -595,7 +682,7 @@ Provide a comprehensive, well-structured answer using the documentation above:""
             if text_hash not in seen_texts:
                 seen_texts.add(text_hash)
                 deduped.append(chunk)
-        top_candidates = deduped[:30]
+        top_candidates = deduped[:15]
 
         stages[-1]["status"] = "done"
         stages[-1]["detail"] = f"{len(top_candidates)} unique chunks after dedup (from {len(all_chunks)})"
@@ -604,36 +691,36 @@ Provide a comprehensive, well-structured answer using the documentation above:""
         stages.append({"stage": 4, "name": "Relevance Filter", "status": "running"})
 
         chunk_summaries = ""
-        for i, chunk in enumerate(top_candidates[:20]):
-            snippet = chunk["text"][:300].replace('\n', ' ')
+        for i, chunk in enumerate(top_candidates[:15]):
+            snippet = chunk["text"][:250].replace('\n', ' ')
             chunk_summaries += f"[{i+1}] {snippet}\n\n"
 
         filter_prompt = [
             {"role": "system", "content": "You are evaluating document relevance. Given a question and numbered document snippets, return ONLY the numbers of snippets that are DIRECTLY relevant to answering the question. Return numbers separated by commas, nothing else."},
             {"role": "user", "content": f"Question: {query}\n\nDocuments:\n{chunk_summaries}\n\nRelevant document numbers (comma-separated):"}
         ]
-        filter_result = self._phi4_chat(filter_prompt, max_tokens=100, temperature=0.1)
+        filter_result = self._phi4_chat(filter_prompt, max_tokens=50, temperature=0.1, llm_override=llm_override)
 
         relevant_indices = set()
         for token in re.findall(r'\d+', filter_result):
             idx = int(token) - 1
-            if 0 <= idx < len(top_candidates[:20]):
+            if 0 <= idx < len(top_candidates[:15]):
                 relevant_indices.add(idx)
 
         if not relevant_indices:
-            relevant_indices = set(range(min(10, len(top_candidates))))
+            relevant_indices = set(range(min(8, len(top_candidates))))
 
         filtered_chunks = [top_candidates[i] for i in sorted(relevant_indices)]
 
         stages[-1]["status"] = "done"
-        stages[-1]["detail"] = f"{len(filtered_chunks)} relevant chunks (filtered from {min(20, len(top_candidates))})"
+        stages[-1]["detail"] = f"{len(filtered_chunks)} relevant chunks (filtered from {min(15, len(top_candidates))})"
 
         # ---- STAGE 5: Synthesis ----
         stages.append({"stage": 5, "name": "Comprehensive Synthesis", "status": "running"})
 
         context_parts = []
         sources = []
-        for chunk in filtered_chunks[:15]:
+        for chunk in filtered_chunks[:12]:
             context_parts.append(chunk["text"])
             fname = chunk["metadata"].get("filename", "unknown")
             cat = chunk["metadata"].get("category", "")
@@ -654,30 +741,15 @@ RULES:
 - Be definitive — no hedging language
 
 {IDF_GROUND_TRUTH}"""},
-            {"role": "user", "content": f"DOCUMENTATION CONTEXT:\n{context[:8000]}\n\nQUESTION: {query}\n\nProvide a comprehensive, well-structured answer:"}
+            {"role": "user", "content": f"DOCUMENTATION CONTEXT:\n{context[:7000]}\n\nQUESTION: {query}\n\nProvide a comprehensive, well-structured answer:"}
         ]
-        synthesis_result = self._phi4_chat(synthesis_prompt, max_tokens=1500, temperature=0.2)
+        synthesis_result = self._phi4_chat(synthesis_prompt, max_tokens=1000, temperature=0.2, llm_override=llm_override)
 
         stages[-1]["status"] = "done"
         stages[-1]["detail"] = f"Answer synthesized from {len(filtered_chunks)} sources"
 
-        # ---- STAGE 6: Self-Verification ----
-        stages.append({"stage": 6, "name": "Self-Verification", "status": "running"})
-
-        verify_prompt = [
-            {"role": "system", "content": "You are a fact-checker. Review the answer below against the provided context. If any claims are NOT supported by the context, rewrite the answer removing those claims. If the answer is fully supported, return it unchanged. Return ONLY the final verified answer."},
-            {"role": "user", "content": f"CONTEXT:\n{context[:4000]}\n\nANSWER TO VERIFY:\n{synthesis_result}\n\nVerified answer:"}
-        ]
-        verified_answer = self._phi4_chat(verify_prompt, max_tokens=1500, temperature=0.1)
-
-        if not verified_answer or len(verified_answer) < len(synthesis_result) * 0.3:
-            verified_answer = synthesis_result
-
-        stages[-1]["status"] = "done"
-        stages[-1]["detail"] = "Answer verified against source documents"
-
         return {
-            "answer": verified_answer,
+            "answer": synthesis_result,
             "sources": sources[:10],
             "sub_queries": sub_queries,
             "stages": stages,

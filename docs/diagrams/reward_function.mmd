@@ -1,0 +1,16 @@
+flowchart TD
+  resp["Phi-4 candidate proto"] --> p["_parse_llm_response"]
+  p --> r1["Format compliance<br/>0.15"]
+  p --> r2["API method correct<br/>0.25"]
+  p --> r3["Structural validity<br/>(proto_ast parse + check)<br/>0.25"]
+  p --> r4["Column-exists rate<br/>(schema_service.has_attribute)<br/>0.20"]
+  p --> r5["Field Jaccard vs gold<br/>0.15"]
+  r1 --> sum(("reward in [0,1]"))
+  r2 --> sum
+  r3 --> sum
+  r4 --> sum
+  r5 --> sum
+  sum --> grpo["GRPO best-of-N<br/>policy update"]
+
+  classDef det fill:#0e7490,stroke:#155e75,color:#fff;
+  class r3,r4 det;

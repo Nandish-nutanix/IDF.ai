@@ -1,0 +1,21 @@
+sequenceDiagram
+  participant S as server.process_query
+  participant G as proto_response_generator
+  participant SC as schema_service
+  participant M as Phi-4 (MLX + Outlines)
+  participant V as ir_validator
+  participant R as ir_to_proto
+  S->>G: generate_proto(query)
+  G->>SC: resolve_entity_type + attributes + exemplars
+  G->>M: constrained JSON IR (guided_json)
+  M-->>G: IR (api, entity, filters, columns, sort, limit)
+  G->>V: validate + repair against real schema
+  alt valid or repaired
+    G->>R: render IR -> proto
+  else irreparable
+    G->>M: self-correct once with errors
+    M-->>G: IR'
+    G->>V: re-validate / repair
+    G->>R: render (or minimal fallback IR)
+  end
+  R-->>S: proto + api_method + confidence

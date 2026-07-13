@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>IDF AI — How it works</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root{ --ink:#0f172a; --muted:#5b6b86; --line:#e2e8f0; --accent:#6366f1; --teal:#0891b2; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#ffffff;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1440px;margin:0 auto;padding:40px 48px 60px;}
+  h1{font-size:40px;margin:0 0 6px;font-weight:800;letter-spacing:-0.6px;}
+  h1 .g{color:var(--accent);}
+  .sub{color:var(--muted);font-size:19px;margin:0 0 14px;line-height:1.5;}
+  section{margin-top:40px;}
+  h2{font-size:26px;margin:0 0 14px;font-weight:750;}
+  .archimg{width:100%;border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 14px 40px rgba(15,23,42,.10);display:block;}
+  .mermaid{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:26px;}
+  .two{display:grid;gap:26px;grid-template-columns:1fr 1fr;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;
+    box-shadow:0 10px 30px rgba(15,23,42,.06);}
+  .card h3{margin:0 0 10px;font-size:20px;}
+  .slide{background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid var(--line);
+    border-radius:18px;padding:30px 34px;box-shadow:0 12px 34px rgba(15,23,42,.08);}
+  .slide h2{margin:0 0 4px;}
+  .slide .lead{color:var(--muted);font-size:17px;margin:0 0 22px;line-height:1.5;}
+  .steps{display:grid;gap:16px;grid-template-columns:repeat(4,1fr);}
+  .step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;
+    position:relative;box-shadow:0 6px 18px rgba(15,23,42,.05);}
+  .step .n{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#fff;font-size:15px;margin-bottom:10px;}
+  .step:nth-child(1) .n{background:#6366f1;} .step:nth-child(2) .n{background:#0891b2;}
+  .step:nth-child(3) .n{background:#7c3aed;} .step:nth-child(4) .n{background:#0ea5e9;}
+  .step h4{margin:0 0 6px;font-size:16px;}
+  .step p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5;}
+  .built{display:grid;gap:16px;grid-template-columns:repeat(3,1fr);margin-top:22px;}
+  .built .b{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;}
+  .built .b h4{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px;}
+  .built .b .tag{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--accent);}
+  .built .b p{margin:6px 0 0;color:var(--muted);font-size:13.5px;line-height:1.5;}
+  .guarantee{margin-top:22px;background:#0f172a;color:#e2e8f0;border-radius:14px;padding:18px 22px;
+    font-size:15.5px;line-height:1.5;}
+  .guarantee b{color:#a5b4fc;}
+  footer{color:var(--muted);font-size:15px;margin-top:48px;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>IDF AI — <span class="g">How the query pipeline works</span></h1>
+  <p class="sub">Plain-English questions become valid IDF query protos — grounded in the real schema,
+    drafted by Microsoft Phi-4, validated, and rendered. The system returns a valid proto every time.</p>
+
+  <section id="s_arch">
+    <h2>The pipeline at a glance</h2>
+    <img class="archimg" src="ai_architecture.png" alt="IDF AI architecture" />
+  </section>
+
+  <section id="s_build">
+    <div class="slide">
+      <h2>How it works &mdash; and how it was built</h2>
+      <p class="lead">Four steps turn a plain-English question into a valid IDF query proto. Nothing is guessed &mdash;
+        every entity and field is checked against your cluster's real schema before it reaches you.</p>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h4>Ground in the schema</h4>
+          <p>We read the question and pull the matching entity type, its valid fields, and a few real examples straight from the live IDF schema.</p></div>
+        <div class="step"><div class="n">2</div><h4>Phi-4 drafts the query</h4>
+          <p>Microsoft Phi-4 (running locally on Apple Silicon via MLX) writes a candidate query proto using only the grounded context.</p></div>
+        <div class="step"><div class="n">3</div><h4>Validate &amp; repair</h4>
+          <p>Every entity, field, and type is checked against the real schema. Wrong or invalid fields are corrected automatically.</p></div>
+        <div class="step"><div class="n">4</div><h4>Render a valid proto</h4>
+          <p>A deterministic renderer emits syntactically correct proto text &mdash; plus the runnable Python and a confidence score.</p></div>
+      </div>
+
+      <div class="built">
+        <div class="b"><span class="tag">Trained on truth</span>
+          <h4>Real-schema data</h4>
+          <p>Training examples are generated from the actual IDF schema, so the model learns your entities and fields &mdash; not a generic guess.</p></div>
+        <div class="b"><span class="tag">Fine-tuned</span>
+          <h4>LoRA + GRPO</h4>
+          <p>Phi-4 is fine-tuned with LoRA, then reward-tuned with GRPO on a schema-aware reward (right format, right API, valid fields, matches intent).</p></div>
+        <div class="b"><span class="tag">Never fails</span>
+          <h4>Constrained + fallback</h4>
+          <p>Grammar-constrained decoding keeps output structurally valid; if a draft still can't be fixed, a guaranteed minimal proto is returned.</p></div>
+      </div>
+
+      <div class="guarantee">The result: <b>every query returns a valid, schema-faithful proto</b> &mdash;
+        grounded in your real schema, validated field-by-field, and safe to run against the cluster.</div>
+    </div>
+  </section>
+
+  <section id="s_loop">
+    <h2>Inference loop &mdash; every path ends in a valid proto</h2>
+    <div class="mermaid" id="m_loop"></div>
+  </section>
+
+  <section id="s_train">
+    <h2>How the model is built</h2>
+    <div class="two">
+      <div class="card">
+        <h3>Training pipeline (Phi-4 only)</h3>
+        <div class="mermaid" id="m_train"></div>
+      </div>
+      <div class="card">
+        <h3>Reward signal (schema-aware)</h3>
+        <div class="mermaid" id="m_reward"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>IDF AI &middot; Microsoft Phi-4 query pipeline</footer>
+</div>
+
+<script>
+const DIAGRAMS = {
+  m_loop: `sequenceDiagram
+  participant U as User
+  participant S as Server
+  participant SC as Schema service
+  participant M as Phi-4 (MLX)
+  participant V as Validator
+  participant R as Renderer
+  U->>S: plain-English query
+  S->>SC: resolve entity + valid fields + examples
+  S->>M: draft the query
+  M-->>S: draft
+  S->>V: validate against schema
+  alt valid or fixable
+    S->>R: render proto
+  else not fixable
+    S->>M: self-correct once
+    M-->>S: new draft
+    S->>R: render (or minimal fallback)
+  end
+  R-->>U: valid IDF proto + confidence`,
+  m_train: `flowchart LR
+  tmpl[("IDF schema")] --> data["Training data<br/>(real schema)"]
+  data --> lora["LoRA fine-tune<br/>phi-4-4bit"]
+  lora --> fused["Phi-4 model"]
+  fused --> grpo["GRPO reward tuning"]
+  grpo --> rl["Phi-4 model (tuned)"]`,
+  m_reward: `flowchart TD
+  resp["candidate query"] --> r1["Right format"]
+  resp --> r2["Right API"]
+  resp --> r3["Structurally valid"]
+  resp --> r4["Fields exist in schema"]
+  resp --> r5["Matches intent"]
+  r1 --> sum(("reward"))
+  r2 --> sum
+  r3 --> sum
+  r4 --> sum
+  r5 --> sum`,
+};
+mermaid.initialize({ startOnLoad:false, theme:'default', securityLevel:'loose',
+  themeVariables:{ fontSize:'16px' } });
+async function boot(){
+  for (const [id, def] of Object.entries(DIAGRAMS)){
+    try { const { svg } = await mermaid.render(id+'_svg', def);
+      document.getElementById(id).innerHTML = svg;
+    } catch(e){ document.getElementById(id).textContent = 'diagram error: '+e.message; }
+  }
+  window.__explainerReady = true;
+}
+window.addEventListener('load', boot);
+</script>
+</body>
+</html>

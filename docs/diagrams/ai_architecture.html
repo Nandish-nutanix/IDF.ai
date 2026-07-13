@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>IDF AI — Phi-4 Query Pipeline (simple)</title>
+<style>
+  :root{
+    --ink:#0f172a; --muted:#64748b; --line:#cbd5e1;
+    --indigo:#6366f1; --indigo-bg:#eef2ff;
+    --teal:#0891b2; --teal-bg:#ecfeff;
+    --green:#059669; --green-bg:#ecfdf5;
+    --blue:#2563eb; --blue-bg:#eff6ff;
+    --amber:#d97706; --amber-bg:#fffbeb;
+    --pink:#db2777; --pink-bg:#fdf2f8;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#ffffff;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  #page{width:1500px;padding:44px 50px 40px;background:#fff;}
+  h1{font-size:34px;margin:0;font-weight:800;letter-spacing:-0.5px;}
+  h1 .g{color:var(--indigo);}
+  .sub{color:var(--muted);font-size:16px;margin-top:8px;max-width:980px;line-height:1.5;}
+  .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin:20px 0 6px;align-items:center;}
+  .legend span{display:inline-flex;align-items:center;gap:8px;}
+  .sw{width:16px;height:16px;border-radius:5px;display:inline-block;border:2px solid;}
+  .lk{width:28px;height:0;border-top:3px solid;display:inline-block;border-radius:2px;}
+
+  #diagram{position:relative;margin-top:18px;}
+  #wires{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible;}
+
+  .lane{position:relative;z-index:2;margin-bottom:54px;}
+  .lane-label{font-size:13px;font-weight:800;letter-spacing:.5px;color:var(--muted);
+    text-transform:uppercase;margin:0 0 16px 2px;}
+  .lane-label b{color:var(--ink);}
+  .row{display:flex;align-items:center;gap:40px;}
+  .row.center{justify-content:center;gap:90px;}
+  .row.left{justify-content:flex-start;gap:46px;}
+
+  /* process card (rounded rectangle) */
+  .node{position:relative;z-index:2;background:#fff;border:2px solid var(--c,#6366f1);
+    border-radius:16px;padding:15px 18px;min-width:188px;max-width:212px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);}
+  .node .num{position:absolute;top:-14px;left:16px;width:26px;height:26px;border-radius:50%;
+    background:var(--c);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(15,23,42,.18);}
+  .node .t{font-size:16px;font-weight:750;color:var(--ink);line-height:1.25;}
+  .node .d{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.45;}
+  .node.small{min-width:166px;max-width:196px;padding:12px 14px;}
+  .node.small .t{font-size:14px;} .node.small .d{font-size:12px;}
+
+  /* pill (input / output) */
+  .pill{position:relative;z-index:2;border-radius:999px;padding:16px 26px;font-weight:750;
+    font-size:16px;text-align:center;min-width:170px;box-shadow:0 6px 16px rgba(15,23,42,.12);}
+  .pill .d{font-weight:500;font-size:12.5px;opacity:.92;margin-top:3px;}
+  .pill.in{background:var(--green);color:#fff;}
+  .pill.out{background:var(--pink);color:#fff;}
+
+  /* cylinder (data store / model) */
+  .cyl{position:relative;z-index:2;min-width:200px;max-width:230px;
+    background:var(--cb,#eff6ff);border:2px solid var(--c,#2563eb);
+    border-radius:14px;padding:26px 16px 16px;margin-top:9px;
+    box-shadow:0 6px 16px rgba(15,23,42,.08);}
+  .cyl::before{content:"";position:absolute;top:-10px;left:-2px;right:-2px;height:19px;
+    background:var(--cb,#eff6ff);border:2px solid var(--c,#2563eb);border-radius:50%;}
+  .cyl .t{position:relative;font-size:16px;font-weight:750;color:var(--ink);}
+  .cyl .d{position:relative;font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.4;}
+
+  .spacer{flex:1;}
+  footer{color:var(--muted);font-size:13px;margin-top:8px;}
+</style>
+</head>
+<body>
+<div id="page">
+  <h1>IDF AI — Plain English <span class="g">&rarr;</span> Valid IDF Query</h1>
+  <div class="sub">A simple, four-step pipeline powered by Microsoft Phi-4. It grounds the question in the
+    real schema, lets the model draft the query, then validates &amp; repairs it &mdash; so the output is a
+    structurally valid, schema-faithful proto <b>every time</b>.</div>
+
+  <div class="legend">
+    <span><i class="sw" style="border-color:var(--green);background:var(--green-bg)"></i> input / output</span>
+    <span><i class="sw" style="border-color:var(--indigo);background:#fff"></i> processing step</span>
+    <span><i class="sw" style="border-color:var(--blue);background:var(--blue-bg)"></i> data / model</span>
+    <span><i class="lk" style="border-color:var(--indigo)"></i> main flow</span>
+    <span><i class="lk" style="border-color:var(--blue);border-top-style:dashed"></i> feeds in</span>
+  </div>
+
+  <div id="diagram">
+    <svg id="wires"></svg>
+
+    <!-- ===== KNOWLEDGE / MODEL ===== -->
+    <div class="lane">
+      <div class="lane-label"><b>What the pipeline relies on</b></div>
+      <div class="row left">
+        <div class="cyl" id="n_schema" style="--c:var(--blue);--cb:var(--blue-bg)">
+          <div class="t">IDF Schema</div>
+          <div class="d">Real entity types and their valid attributes (the source of truth).</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="cyl" id="n_model" style="--c:var(--blue);--cb:var(--blue-bg)">
+          <div class="t">Phi-4 model</div>
+          <div class="d">Fine-tuned Microsoft Phi-4, served locally on-device (MLX).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAIN PIPELINE ===== -->
+    <div class="lane">
+      <div class="lane-label"><b>How a question becomes a query</b></div>
+      <div class="row">
+        <div class="pill in" id="n_query">
+          Plain-English query
+          <div class="d">&ldquo;vms where power is on&rdquo;</div>
+        </div>
+        <div class="node" id="n_ground" style="--c:var(--indigo)">
+          <div class="num" style="--c:var(--indigo)">1</div>
+          <div class="t">Ground in schema</div>
+          <div class="d">Pick the right entity &amp; show the model the valid fields.</div>
+        </div>
+        <div class="node" id="n_gen" style="--c:var(--indigo)">
+          <div class="num" style="--c:var(--indigo)">2</div>
+          <div class="t">Phi-4 drafts query</div>
+          <div class="d">Generates a structured draft of the query.</div>
+        </div>
+        <div class="node" id="n_val" style="--c:var(--teal)">
+          <div class="num" style="--c:var(--teal)">3</div>
+          <div class="t">Validate against schema</div>
+          <div class="d">Check every entity, field &amp; type against the real schema and correct invalid ones.</div>
+        </div>
+        <div class="node" id="n_render" style="--c:var(--green)">
+          <div class="num" style="--c:var(--green)">4</div>
+          <div class="t">Render proto</div>
+          <div class="d">Build the final, guaranteed-valid IDF proto.</div>
+        </div>
+        <div class="pill out" id="n_out">
+          Valid IDF proto
+          <div class="d"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SAFETY NET ===== -->
+    <div class="lane">
+      <div class="lane-label"><b>Why it never fails</b></div>
+      <div class="row center">
+        <div class="node small" id="n_self" style="--c:var(--amber)">
+          <div class="t">Self-correct</div>
+          <div class="d">If still invalid, Phi-4 retries once with the error.</div>
+        </div>
+        <div class="node small" id="n_fb" style="--c:var(--green)">
+          <div class="t">Guaranteed fallback</div>
+          <div class="d">Worst case, emit a minimal valid proto &mdash; output is always usable.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TRAINING ===== -->
+    <div class="lane">
+      <div class="lane-label"><b>How the model is built (offline, one-time)</b></div>
+      <div class="row left">
+        <div class="cyl" id="n_data" style="--c:var(--amber);--cb:var(--amber-bg)">
+          <div class="t">Training data</div>
+          <div class="d">Examples generated from the real schema.</div>
+        </div>
+        <div class="node" id="n_lora" style="--c:var(--amber)">
+          <div class="t">LoRA fine-tune</div>
+          <div class="d">Teach Phi-4 the IDF query format.</div>
+        </div>
+        <div class="node" id="n_grpo" style="--c:var(--amber)">
+          <div class="t">GRPO tuning</div>
+          <div class="d">Reward correct, schema-valid queries.</div>
+        </div>
+        <div class="spacer"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>IDF AI &middot; Microsoft Phi-4 query pipeline</footer>
+</div>
+
+<script>
+const WIRES = [
+  // main flow (indigo, solid)
+  ["n_query","n_ground","#6366f1","solid"],
+  ["n_ground","n_gen","#6366f1","solid"],
+  ["n_gen","n_val","#6366f1","solid"],
+  ["n_val","n_render","#6366f1","solid"],
+  ["n_render","n_out","#6366f1","solid"],
+  // feeds in (blue dashed)
+  ["n_schema","n_ground","#2563eb","dash"],
+  ["n_schema","n_val","#2563eb","dash"],
+  ["n_model","n_gen","#2563eb","dash"],
+  // safety net (amber/green)
+  ["n_val","n_self","#d97706","solid"],
+  ["n_self","n_gen","#d97706","dash"],
+  ["n_gen","n_fb","#94a3b8","dash"],
+  ["n_fb","n_render","#059669","solid"],
+  // training chain (amber) -> produces the model
+  ["n_data","n_lora","#d97706","solid"],
+  ["n_lora","n_grpo","#d97706","solid"],
+  ["n_grpo","n_model","#d97706","dash"],
+];
+
+function box(el, root){
+  const r=el.getBoundingClientRect(), rr=root.getBoundingClientRect();
+  return {x:r.left-rr.left,y:r.top-rr.top,w:r.width,h:r.height,
+          cx:r.left-rr.left+r.width/2,cy:r.top-rr.top+r.height/2};
+}
+function anchors(a,b){
+  const dx=b.cx-a.cx, dy=b.cy-a.cy; let p1,p2,horiz;
+  if(Math.abs(dx)>=Math.abs(dy)){horiz=true;
+    p1={x:dx>=0?a.x+a.w:a.x,y:a.cy}; p2={x:dx>=0?b.x:b.x+b.w,y:b.cy};
+  }else{horiz=false;
+    p1={x:a.cx,y:dy>=0?a.y+a.h:a.y}; p2={x:b.cx,y:dy>=0?b.y:b.y+b.h};}
+  return {p1,p2,horiz};
+}
+function draw(){
+  const root=document.getElementById('diagram'), svg=document.getElementById('wires');
+  const W=root.scrollWidth, H=root.scrollHeight;
+  svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const colors=[...new Set(WIRES.map(w=>w[2]))];
+  let defs='<defs>';
+  colors.forEach((c,i)=>{defs+=`<marker id="ah${i}" markerWidth="10" markerHeight="10" refX="7.5" refY="5"
+    orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`;});
+  defs+='</defs>';
+  let paths='';
+  for(const [from,to,color,style] of WIRES){
+    const ea=document.getElementById(from), eb=document.getElementById(to); if(!ea||!eb) continue;
+    const a=box(ea,root), b=box(eb,root); const {p1,p2,horiz}=anchors(a,b);
+    let c1,c2;
+    if(horiz){const m=(p2.x-p1.x)*0.5;c1=`${p1.x+m},${p1.y}`;c2=`${p2.x-m},${p2.y}`;}
+    else{const m=(p2.y-p1.y)*0.45;c1=`${p1.x},${p1.y+m}`;c2=`${p2.x},${p2.y-m}`;}
+    const mi=colors.indexOf(color); const dash=style==='dash'?'stroke-dasharray="7 6"':'';
+    paths+=`<path d="M${p1.x},${p1.y} C${c1} ${c2} ${p2.x},${p2.y}" fill="none"
+      stroke="${color}" stroke-width="2.6" ${dash} marker-end="url(#ah${mi})" opacity="0.95"/>`;
+  }
+  svg.innerHTML=defs+paths; window.__wiresReady=true;
+}
+window.addEventListener('load',()=>setTimeout(draw,120));
+window.addEventListener('resize',draw);
+</script>
+</body>
+</html>

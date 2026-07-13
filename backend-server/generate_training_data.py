@@ -14,8 +14,16 @@ import re
 import random
 from pathlib import Path
 
+import schema_service
+
 SCRIPT_DIR = Path(__file__).parent
 OUTPUT_FILE = SCRIPT_DIR / "new_training_data.jsonl"
+# Grounded train/valid split consumed by run_finetune.py.
+GROUNDED_DATA_DIR = SCRIPT_DIR / "mlx_finetune_data_grounded"
+
+# Append the real-schema grounding block to each training prompt so the
+# fine-tuned model sees the SAME input distribution it gets at inference.
+INCLUDE_GROUNDING = True
 
 SYSTEM_PROMPT = (
     'You are an IDF query generator. Output the API method on line 1 as '
@@ -252,6 +260,103 @@ def make_example(user_content: str, assistant_content: str) -> dict:
             {"role": "assistant", "content": assistant_content},
         ]
     }
+
+
+# ---------------------------------------------------------------------------
+# Real-schema sourcing (eliminates the hardcoded-dict train/serve skew)
+# ---------------------------------------------------------------------------
+
+def build_entity_schema_from_service(keys) -> dict:
+    """
+    Build the {etype: {str_attrs, int_attrs, bool_attrs}} structure the
+    generators expect, but from the REAL schema (schema_service) instead of the
+    hardcoded ENTITY_SCHEMA dict. Only entity types present in the schema are
+    rebuilt; others keep their hardcoded fallback.
+    """
+    out = {}
+    for et in keys:
+        if not schema_service.has_entity(et):
+            continue
+        attrs = schema_service.attributes_for(et)
+        str_a, int_a, bool_a = [], [], []
+        for name, rec in attrs.items():
+            dt = (rec.get("data_type") or "").lower()
+            if dt in ("int64", "uint64", "float", "double"):
+                int_a.append(name)
+            elif dt in ("bool", "boolean"):
+                bool_a.append(name)
+            else:
+                str_a.append(name)
+
+        def _prioritize(lst):
+            pref = [f"{et}_name", "name", "id", f"{et}_uuid", "uuid",
+                    "status", "power_state", "cluster_name", "node_name"]
+            head = [a for a in pref if a in lst]
+            rest = [a for a in lst if a not in head]
+            return head + rest
+
+        str_a = _prioritize(str_a) or [f"{et}_name"]
+        out[et] = {
+            "str_attrs": str_a[:30],
+            "int_attrs": int_a[:20],
+            "bool_attrs": bool_a[:10],
+        }
+    return out
+
+
+def grounding_block(entity_types) -> str:
+    """Schema grounding appendix, matching proto_response_generator._build_grounding."""
+    lines = ["VALID SCHEMA (use these exact names):"]
+    found = False
+    for et in entity_types:
+        if not schema_service.has_entity(et):
+            continue
+        attrs = schema_service.attributes_for(et)
+        indexed = schema_service.indexed_attributes(et)
+        names = list(dict.fromkeys(indexed + list(attrs.keys())))[:40]
+        if names:
+            lines.append(f"- {et}: {', '.join(names)}")
+            found = True
+    return "\n".join(lines) if found else ""
+
+
+def _api_of(example) -> str:
+    content = example["messages"][-1]["content"]
+    return content.split("\n", 1)[0].replace("API:", "").strip()
+
+
+def balance_apis(examples, floor: int = 14):
+    """
+    Upsample under-represented APIs to a floor count so the model sees every
+    API enough times. GetEntitiesWithMetrics (already dominant) is untouched.
+    """
+    by_api = {}
+    for ex in examples:
+        by_api.setdefault(_api_of(ex), []).append(ex)
+    extra = []
+    for api, items in by_api.items():
+        if api == "GetEntitiesWithMetrics" or not items:
+            continue
+        i = 0
+        while len(items) + sum(1 for e in extra if _api_of(e) == api) < floor:
+            extra.append(items[i % len(items)])
+            i += 1
+    return examples + extra
+
+
+def add_grounding(examples):
+    """Append the schema grounding block to each example's user message."""
+    if not INCLUDE_GROUNDING:
+        return examples
+    for ex in examples:
+        assistant = ex["messages"][-1]["content"]
+        ets = list(dict.fromkeys(re.findall(r'entity_type_name\s*:\s*"([^"]+)"', assistant)))
+        if not ets:
+            continue
+        block = grounding_block(ets)
+        if block:
+            ex["messages"][1]["content"] = ex["messages"][1]["content"] + "\n\n" + block
+    return examples
 
 
 def gen_gewm_basic(etype, schema):
@@ -1375,6 +1480,16 @@ def main():
     random.seed(42)
     all_examples = []
 
+    # Replace hardcoded attribute lists with REAL ones from the schema service
+    # (single source of truth) to eliminate train/serve skew.
+    real_schema = build_entity_schema_from_service(list(ENTITY_SCHEMA.keys()))
+    rebuilt = 0
+    for etype in list(ENTITY_SCHEMA.keys()):
+        if etype in real_schema:
+            ENTITY_SCHEMA[etype] = real_schema[etype]
+            rebuilt += 1
+    print(f"Schema source: rebuilt {rebuilt}/{len(ENTITY_SCHEMA)} entity types from schema_service")
+
     # Generate GEWM examples for each major entity type
     for etype, schema in ENTITY_SCHEMA.items():
         all_examples.extend(gen_gewm_basic(etype, schema)[:2])
@@ -1413,15 +1528,33 @@ def main():
     all_examples.extend(gen_detach_entity())
     all_examples.extend(gen_host_mapping_examples())
 
+    # Upsample rare APIs so every API is represented, then append grounding so
+    # training input == inference input distribution.
+    all_examples = balance_apis(all_examples, floor=14)
+    all_examples = add_grounding(all_examples)
+
     # Shuffle for training diversity
     random.shuffle(all_examples)
 
-    # Write output
+    # Write the flat reference file.
     with open(OUTPUT_FILE, 'w') as f:
         for ex in all_examples:
             f.write(json.dumps(ex) + '\n')
-
     print(f"Generated {len(all_examples)} training examples -> {OUTPUT_FILE}")
+
+    # Write a 90/10 train/valid split for run_finetune.py (Phi-4 LoRA).
+    GROUNDED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    split = max(1, len(all_examples) // 10)
+    valid = all_examples[:split]
+    train = all_examples[split:]
+    with open(GROUNDED_DATA_DIR / "train.jsonl", "w") as f:
+        for ex in train:
+            f.write(json.dumps(ex) + "\n")
+    with open(GROUNDED_DATA_DIR / "valid.jsonl", "w") as f:
+        for ex in valid:
+            f.write(json.dumps(ex) + "\n")
+    print(f"Wrote grounded split -> {GROUNDED_DATA_DIR} (train={len(train)}, valid={len(valid)})")
+    print(f"Grounding appended to prompts: {INCLUDE_GROUNDING}")
 
     # Print API distribution
     api_counts = {}

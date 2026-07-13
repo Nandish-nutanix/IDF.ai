@@ -26,42 +26,48 @@ def main():
     log("IDF Query Model - Local MLX Fine-tuning")
     log("=" * 50)
 
-    MODEL = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
+    # Microsoft Phi-4 is the ONLY base model used by this project.
+    MODEL = "mlx-community/phi-4-4bit"
 
     log(f"Step 1: Downloading model ({MODEL})...")
     from huggingface_hub import snapshot_download
     model_path = snapshot_download(MODEL)
     log(f"Model cached at: {model_path}")
 
-    log("Step 2: Starting LoRA training...")
+    log("Step 2: Starting LoRA training (Phi-4)...")
     from mlx_lm import lora
 
+    # More iterations than the original 225 (~0.6 epoch). 600 iters with the
+    # grounded dataset gives ~2-3 epochs, which is where the format + schema
+    # grounding actually converge without overfitting (val loss is monitored).
     sys.argv = [
         "mlx_lm_lora",
         "--model", MODEL,
         "--train",
-        "--data", "./mlx_finetune_data",
+        "--data", "./mlx_finetune_data_grounded",
         "--fine-tune-type", "lora",
         "--batch-size", "1",
         "--grad-accumulation-steps", "8",
-        "--iters", "225",
+        "--iters", "600",
         "--num-layers", "16",
         "--learning-rate", "5e-5",
-        "--max-seq-length", "1024",
+        "--max-seq-length", "1536",
         "--grad-checkpoint",
         "--mask-prompt",
-        "--adapter-path", "./idf_lora_adapter",
-        "--save-every", "50",
+        "--adapter-path", "./phi4_idf_adapter",
+        "--save-every", "100",
         "--steps-per-report", "10",
-        "--steps-per-eval", "50",
-        "--val-batches", "10",
+        "--steps-per-eval", "100",
+        "--val-batches", "20",
         "--seed", "42",
     ]
     lora.main()
 
     log("=" * 50)
     log("Training COMPLETE!")
-    log("Adapter saved to: ./idf_lora_adapter/")
+    log("Adapter saved to: ./phi4_idf_adapter/")
+    log("Next: fuse with  python3 -m mlx_lm.fuse --model mlx-community/phi-4-4bit \\")
+    log("        --adapter-path ./phi4_idf_adapter --save-path ./phi4_idf_fused")
     log("=" * 50)
 
 if __name__ == "__main__":

@@ -55,3 +55,12 @@ Thumbs.db
 
 # Cluster schema dumps (regenerated)
 backend-server/cluster_schemas/
+
+# Raw documents served by the lite UI backend (proprietary, not for GitHub)
+idf_query_ui/backend/html_docs/
+idf_query_ui/backend/doc_index.json
+
+# Large demo media (kept out of git history)
+docs/diagrams/*.mp4
+docs/diagrams/*.webm
+docs/diagrams/_recording/

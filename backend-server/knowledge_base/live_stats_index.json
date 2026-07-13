@@ -1,0 +1,104 @@
+{
+  "cluster_ip": "10.96.192.11",
+  "crawled_at": "2026-07-02 14:36:55",
+  "total_pages": 16,
+  "status": "complete",
+  "pages": [
+    {
+      "endpoint": "/",
+      "url": "http://<CVM_IP>:2027/",
+      "text_length": 2810,
+      "is_html": true
+    },
+    {
+      "endpoint": "/detailed_unevictable_cache_stats",
+      "url": "http://<CVM_IP>:2027/detailed_unevictable_cache_stats",
+      "text_length": 6835,
+      "is_html": true
+    },
+    {
+      "endpoint": "/h",
+      "url": "http://<CVM_IP>:2027/h",
+      "text_length": 486,
+      "is_html": true
+    },
+    {
+      "endpoint": "/h/gflags",
+      "url": "http://<CVM_IP>:2027/h/gflags",
+      "text_length": 107795,
+      "is_html": true
+    },
+    {
+      "endpoint": "/h/pprof/cmdline",
+      "url": "http://<CVM_IP>:2027/h/pprof/cmdline",
+      "text_length": 1318,
+      "is_html": false
+    },
+    {
+      "endpoint": "/h/pprof/growth",
+      "url": "http://<CVM_IP>:2027/h/pprof/growth",
+      "text_length": 247986,
+      "is_html": false
+    },
+    {
+      "endpoint": "/h/pprof/heap",
+      "url": "http://<CVM_IP>:2027/h/pprof/heap",
+      "text_length": 150447,
+      "is_html": false
+    },
+    {
+      "endpoint": "/h/pprof/heapstats",
+      "url": "http://<CVM_IP>:2027/h/pprof/heapstats",
+      "text_length": 15651,
+      "is_html": false
+    },
+    {
+      "endpoint": "/h/threads",
+      "url": "http://<CVM_IP>:2027/h/threads",
+      "text_length": 24642,
+      "is_html": false
+    },
+    {
+      "endpoint": "/h/traces",
+      "url": "http://<CVM_IP>:2027/h/traces",
+      "text_length": 290,
+      "is_html": true
+    },
+    {
+      "endpoint": "/h/vars",
+      "url": "http://<CVM_IP>:2027/h/vars",
+      "text_length": 51940,
+      "is_html": true
+    },
+    {
+      "endpoint": "/index_map_stats",
+      "url": "http://<CVM_IP>:2027/index_map_stats",
+      "text_length": 8469,
+      "is_html": true
+    },
+    {
+      "endpoint": "/pprof/cmdline",
+      "url": "http://<CVM_IP>:2027/pprof/cmdline",
+      "text_length": 1318,
+      "is_html": false
+    },
+    {
+      "endpoint": "/pprof/growth",
+      "url": "http://<CVM_IP>:2027/pprof/growth",
+      "text_length": 248182,
+      "is_html": false
+    },
+    {
+      "endpoint": "/pprof/heap",
+      "url": "http://<CVM_IP>:2027/pprof/heap",
+      "text_length": 150643,
+      "is_html": false
+    },
+    {
+      "endpoint": "/rpc_stats",
+      "url": "http://<CVM_IP>:2027/rpc_stats",
+      "text_length": 1613,
+      "is_html": true
+    }
+  ]
+}

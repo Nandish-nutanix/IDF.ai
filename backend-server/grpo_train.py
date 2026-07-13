@@ -7,7 +7,7 @@ Memory-efficient approach for M3 18GB:
   - Applies reward-weighted policy gradient updates
 
 Hardware: Apple Silicon M3, 18GB unified memory
-Model: idf_query_fused (Qwen2.5-Coder-7B-Instruct-4bit, LoRA fine-tuned)
+Model: phi4_idf_fused (Microsoft Phi-4, LoRA fine-tuned) - the ONLY model used
 
 Usage:
     python3.12 grpo_train.py              # Full GRPO training
@@ -25,13 +25,16 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from proto_response_generator import _validate_proto
+import proto_ast
+import schema_service
+import ir_validator
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 GRPO_DATA_PATH = os.path.join(SCRIPT_DIR, "grpo_training_data.jsonl")
-EXISTING_TRAIN_PATH = os.path.join(SCRIPT_DIR, "mlx_finetune_data", "train.jsonl")
-MODEL_PATH = os.path.join(SCRIPT_DIR, "idf_query_fused")
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "idf_grpo_adapter")
-MERGED_OUTPUT = os.path.join(SCRIPT_DIR, "idf_query_fused_rl")
+EXISTING_TRAIN_PATH = os.path.join(SCRIPT_DIR, "mlx_finetune_data_grounded", "train.jsonl")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "phi4_idf_fused")
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "phi4_grpo_adapter")
+MERGED_OUTPUT = os.path.join(SCRIPT_DIR, "phi4_idf_fused_rl")
 MLX_SERVER_URL = "http://127.0.0.1:8090/v1/chat/completions"
 
 VALID_API_NAMES = {
@@ -61,52 +64,79 @@ def _parse_llm_response(response: str):
     return api_method, proto_text
 
 
+def _column_exists_rate(proto_text: str, api_method: str) -> float:
+    """Fraction of referenced columns that are REAL attributes of the entity."""
+    try:
+        ir = ir_validator.proto_to_ir(proto_text, api_method)
+    except Exception:
+        return 0.0
+    et = ir.entity_type
+    if not et or not schema_service.has_entity(et):
+        return 0.0
+    cols = list(ir.columns) + [f.column for f in ir.filters if f.column]
+    if ir.sort_column:
+        cols.append(ir.sort_column)
+    cols = [c for c in cols if c]
+    if not cols:
+        return 1.0  # nothing to get wrong
+    real = sum(1 for c in cols if schema_service.has_attribute(et, c))
+    return real / len(cols)
+
+
 def idf_reward(response: str, ground_truth: str) -> float:
     """
-    IDF-specific reward function for GRPO training.
-    
-    Components:
-      0.2 - Format compliance (starts with "API: X", valid API name)
-      0.3 - Correct API method (matches ground truth)
-      0.3 - Proto structural validity (passes _validate_proto)
-      0.2 - Field-level accuracy (key fields present)
-    
-    Returns float in [0.0, 1.0]
+    Schema-aware reward for GRPO. Reuses the same validator/schema service the
+    inference pipeline uses, so the RL signal directly optimizes the metric we
+    actually care about: structurally valid AND schema-faithful protos.
+
+    Components (sum to 1.0):
+      0.15 - Format compliance (starts with "API: X", valid API name)
+      0.25 - Correct API method (matches ground truth)
+      0.25 - Proto structural validity (parses cleanly + passes _validate_proto)
+      0.20 - Column-exists rate (every column a real attribute of the entity)
+      0.15 - Field Jaccard vs ground truth
     """
     score = 0.0
-    
+
     try:
         api_method, proto_text = _parse_llm_response(response)
     except Exception:
         return 0.0
-    
+
     try:
         gt_api, gt_proto = _parse_llm_response(ground_truth)
     except Exception:
         gt_api, gt_proto = "", ""
-    
-    # R1: Format compliance (0.2)
+
+    # R1: Format compliance (0.15)
     if response.strip().startswith("API: ") and api_method in VALID_API_NAMES:
-        score += 0.2
-    
-    # R2: Correct API method (0.3)
+        score += 0.15
+
+    # R2: Correct API method (0.25)
     if api_method == gt_api:
-        score += 0.3
-    
-    # R3: Proto structural validity (0.3)
+        score += 0.25
+
+    # R3: Structural validity (0.25) - AST parse must be clean AND legacy check passes
     if api_method and proto_text:
+        parse_clean = len(proto_ast.parse(proto_text).get("errors", [])) == 0
         is_valid, _ = _validate_proto(proto_text, api_method)
-        if is_valid:
-            score += 0.3
-    
-    # R4: Field-level accuracy (0.2)
+        if parse_clean and is_valid:
+            score += 0.25
+        elif parse_clean or is_valid:
+            score += 0.12
+
+    # R4: Column-exists rate against the REAL schema (0.20)
+    if proto_text:
+        score += 0.20 * _column_exists_rate(proto_text, api_method)
+
+    # R5: Field Jaccard vs ground truth (0.15)
     if gt_proto and proto_text:
         gt_fields = set(re.findall(r'(\w+):', gt_proto))
         resp_fields = set(re.findall(r'(\w+):', proto_text))
         if gt_fields:
-            overlap = len(gt_fields & resp_fields) / len(gt_fields)
-            score += 0.2 * overlap
-    
+            jacc = len(gt_fields & resp_fields) / max(len(gt_fields | resp_fields), 1)
+            score += 0.15 * jacc
+
     return min(score, 1.0)
 
 
@@ -116,7 +146,7 @@ def generate_completion(prompt: str, temperature: float = 0.7) -> str:
         resp = requests.post(
             MLX_SERVER_URL,
             json={
-                "model": "idf_query_fused",
+                "model": "phi4_idf_fused",
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
