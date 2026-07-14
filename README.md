@@ -14,9 +14,9 @@ knowledge base with a one-click Glean hand-off.
 
 ## Demo — IDF.ai walkthrough
 
-<video src="https://github.com/Nandish-nutanix/IDF.ai/raw/main/docs/diagrams/idf_demo.mp4" controls width="100%"></video>
+https://github.com/Nandish-nutanix/IDF.ai/releases/download/demo/idf_demo.mp4
 
-▶ **[Watch the IDF.ai walkthrough](docs/diagrams/idf_demo.mp4)** — full end-to-end tour of every feature, running live against a real cluster.
+▶ **[Watch the IDF.ai walkthrough](https://github.com/Nandish-nutanix/IDF.ai/releases/download/demo/idf_demo.mp4)** — full end-to-end tour of every feature, running live against a real cluster. Also on the [release page](https://github.com/Nandish-nutanix/IDF.ai/releases/tag/demo).
 
 ---
 
