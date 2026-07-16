@@ -7,7 +7,7 @@ Tests both simple and complex queries through the UI backend
 import requests
 import json
 import time
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 # Backend URL
 BACKEND_URL = "http://localhost:3001"
@@ -230,7 +230,7 @@ def print_result(result: Dict[str, Any], index: int):
             if validation.get("warnings"):
                 print(f"   ⚠️  WARNINGS: {', '.join(validation['warnings'])}")
             if validation.get("is_valid", True) and not validation.get("warnings"):
-                print(f"   ✅ Validation: PASSED")
+                print("   ✅ Validation: PASSED")
     else:
         print(f"   Error: {result.get('error', 'Unknown error')}")
 
@@ -282,13 +282,13 @@ def run_tests():
     total_issues = sum(1 for r in all_results if r.get("validation", {}).get("issues"))
     total_warnings = sum(1 for r in all_results if r.get("validation", {}).get("warnings"))
     
-    print(f"\n📊 Overall Statistics:")
+    print("\n📊 Overall Statistics:")
     print(f"   Total Tests: {total_tests}")
     print(f"   Successful: {total_success} ({(total_success/total_tests)*100:.1f}%)")
     print(f"   With Issues: {total_issues}")
     print(f"   With Warnings: {total_warnings}")
     
-    print(f"\n📈 Category Breakdown:")
+    print("\n📈 Category Breakdown:")
     for category, stats in category_stats.items():
         status = "✅" if stats["success_rate"] == 100 and stats["issues"] == 0 else "⚠️" if stats["success_rate"] >= 80 else "❌"
         print(f"   {status} {category:25s}: {stats['success']}/{stats['total']} success, {stats['issues']} issues, {stats['warnings']} warnings")
@@ -303,13 +303,13 @@ def run_tests():
             })
     
     if issues_found:
-        print(f"\n🐛 ISSUES REQUIRING FIXES:")
+        print("\n🐛 ISSUES REQUIRING FIXES:")
         for i, item in enumerate(issues_found, 1):
             print(f"\n   {i}. Query: {item['query']}")
             for issue in item["issues"]:
                 print(f"      - {issue}")
     else:
-        print(f"\n✅ NO CRITICAL ISSUES FOUND!")
+        print("\n✅ NO CRITICAL ISSUES FOUND!")
     
     # Save detailed results
     with open("/Users/kumar.gaurav/Documents/workspace/main/idf_query_ui/test_results.json", "w") as f:
@@ -326,7 +326,7 @@ def run_tests():
             "issues": issues_found
         }, f, indent=2)
     
-    print(f"\n💾 Detailed results saved to: test_results.json")
+    print("\n💾 Detailed results saved to: test_results.json")
     print("="*80 + "\n")
     
     return all_results, issues_found
@@ -342,8 +342,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Cannot connect to backend at {BACKEND_URL}")
         print(f"   Error: {e}")
-        print(f"\n   Please ensure the backend is running:")
-        print(f"   cd idf_query_ui/backend && python3 app.py")
+        print("\n   Please ensure the backend is running:")
+        print("   cd idf_query_ui/backend && python3 app.py")
         exit(1)
     
     results, issues = run_tests()

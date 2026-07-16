@@ -4,12 +4,10 @@ Executes both on the target cluster and compares results.
 """
 import sys
 import os
-import json
 import time
 import re
 import requests
 import subprocess
-import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -353,7 +351,7 @@ def main():
     avg_latency = sum(r['latency'] for r in results) / n if n else 0
     tmpl_rate = sum(1 for r in results if r['template'])
 
-    print(f"\nOVERALL ACCURACY")
+    print("\nOVERALL ACCURACY")
     print(f"  Structural accuracy (proto shape): {avg_score:.1f}%")
     print(f"  Execution match (same results):    {total_exec_match}/{n} ({total_exec_match/n*100:.0f}%)")
     print(f"  Full pass (struct >= 70 + match):   {total_pass}/{n} ({total_pass/n*100:.0f}%)")

@@ -8,16 +8,14 @@ Key improvements over original:
 - Entity-aware reranking to boost chunks from detected entity types
 """
 
-import hashlib
 import json
 import logging
 import math
-import os
 import re
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
 import chromadb
 from chromadb.config import Settings
@@ -347,7 +345,7 @@ def _entity_aware_rerank(
     Rerank results by boosting chunks that belong to detected entity types
     mentioned in the query.
     """
-    from query_classifier import extract_entity_type, ENTITY_ALIASES
+    from query_classifier import extract_entity_type
 
     detected_entity = extract_entity_type(query)
     if not detected_entity:

@@ -12,7 +12,6 @@ import argparse
 import json
 import os
 import sys
-from typing import Optional
 
 import requests
 
@@ -210,7 +209,7 @@ def main():
     if not args.raw and not args.python and not args.go and "selected_tuples" in response and response["selected_tuples"]:
         tuples_list = response["selected_tuples"]
         sorted_tuples_list = sorted(tuples_list)
-        print(f"\n# Related entity types and attributes (entity_type, attribute):", file=sys.stderr)
+        print("\n# Related entity types and attributes (entity_type, attribute):", file=sys.stderr)
         for t in sorted_tuples_list:
             if len(t) == 2:
                 print(f"#   ({t[0]}, {t[1]})", file=sys.stderr)

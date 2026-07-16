@@ -8,8 +8,7 @@ the IDF MCP server handles every scenario correctly.
 
 import requests
 import json
-import time
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 API_URL = "http://localhost:3001/generate"
 
@@ -62,7 +61,7 @@ class QueryTester:
                         return False
             
             self.passed += 1
-            print(f"✅ PASSED")
+            print("✅ PASSED")
             print(f"Protobuf: {json.dumps(protobuf, indent=2)[:500]}...")
             return True
             
@@ -76,7 +75,7 @@ class QueryTester:
     def print_summary(self):
         """Print test summary"""
         print(f"\n{'='*80}")
-        print(f"TEST SUMMARY")
+        print("TEST SUMMARY")
         print(f"{'='*80}")
         print(f"Total Tests: {self.passed + self.failed}")
         print(f"✅ Passed: {self.passed}")
@@ -84,7 +83,7 @@ class QueryTester:
         
         if self.errors:
             print(f"\n{'='*80}")
-            print(f"ERRORS:")
+            print("ERRORS:")
             print(f"{'='*80}")
             for error in self.errors:
                 print(f"  • {error}")

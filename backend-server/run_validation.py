@@ -169,7 +169,7 @@ def print_summary(results):
     # Show failure details
     failures = [r for r in results if r["status"] == "fail"]
     if failures:
-        print(f"\n--- Top Failures (showing first 30) ---")
+        print("\n--- Top Failures (showing first 30) ---")
         for r in failures[:30]:
             print(f"  [{r['id']}] {r['query'][:60]}")
             for issue in r.get("issues", []):

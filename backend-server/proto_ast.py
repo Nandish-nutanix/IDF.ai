@@ -18,7 +18,7 @@ AST shape (dicts, mirroring the JS implementation):
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 _NUM_START = re.compile(r"[0-9]")
 _NUM_BODY = re.compile(r"[-+0-9.eE]")

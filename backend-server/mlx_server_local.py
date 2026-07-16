@@ -8,7 +8,6 @@ Extensions over a plain wrapper:
     generation via Outlines (constrained_decode). When the client asks for the
     QueryIR schema, Phi-4 is constrained to emit a valid IR JSON object.
 """
-import sys
 import json
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler

@@ -16,7 +16,7 @@ import re
 import json
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple
 
 RAW_DOCS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "raw_docs")
 CHROMA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chroma_db")
@@ -332,7 +332,7 @@ def build_chromadb(documents: List[Dict], doc_metadata: Dict):
     EMBEDDINGS_URL = "http://localhost:11434/api/embeddings"
     MODEL = "nomic-embed-text"
 
-    print(f"\n Building ChromaDB vector store...")
+    print("\n Building ChromaDB vector store...")
     print(f"   Embeddings model: {MODEL}")
 
     try:

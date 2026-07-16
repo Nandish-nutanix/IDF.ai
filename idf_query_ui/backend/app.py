@@ -424,7 +424,7 @@ async def submit_feedback(request: FeedbackRequest):
             if request.generated_output:
                 generated_query_dict = json.loads(request.generated_output) if isinstance(request.generated_output, str) else request.generated_output
         except json.JSONDecodeError:
-            print(f"[Backend] Warning: Could not parse generated_output as JSON")
+            print("[Backend] Warning: Could not parse generated_output as JSON")
             generated_query_dict = {"raw": request.generated_output}
         
         try:
@@ -432,7 +432,7 @@ async def submit_feedback(request: FeedbackRequest):
             if request.corrected_output:
                 corrected_query_dict = json.loads(request.corrected_output) if isinstance(request.corrected_output, str) else request.corrected_output
         except json.JSONDecodeError:
-            print(f"[Backend] Warning: Could not parse corrected_output as JSON")
+            print("[Backend] Warning: Could not parse corrected_output as JSON")
             corrected_query_dict = {"raw": request.corrected_output}
         
         # Call query server feedback endpoint if available (payload shape depends on server)
@@ -1745,7 +1745,6 @@ print(f"DONE:created={{created}},errors={{errors}},entity_type={et},attribute={a
 '''
 
     try:
-        import base64
 
         # Write script to CVM via stdin pipe (most reliable - no escaping issues)
         write_cmd = [
@@ -1809,7 +1808,7 @@ async def benchmark_apply_index(request: BenchmarkApplyIndexRequest):
 
     # The populate step already registers the metric WITH is_index_column=True.
     # This step kills all insights_server instances and starts a fresh one with full flags.
-    script = f'''import sys, os, time, subprocess as sp
+    script = '''import sys, os, time, subprocess as sp
 
 print("INDEX_APPLIED:OK (already registered in populate step)", flush=True)
 
@@ -1825,7 +1824,7 @@ remaining = check.stdout.strip()
 if remaining != "0":
     sp.run("pkill -9 -f insights_server", shell=True, capture_output=True, text=True, timeout=10)
     time.sleep(2)
-print(f"KILLED_ALL: remaining={{remaining}}", flush=True)
+print(f"KILLED_ALL: remaining={remaining}", flush=True)
 
 # Wait for port 2027 to be free
 for i in range(10):
@@ -1864,7 +1863,7 @@ IDF_CMD = ("/home/nutanix/bin/insights_server "
     "insights_skip_metric_data_caching,insights_publish_disk_usage_to_nusights,"
     "util_net_enable_serial_md5_implementation")
 
-sp.run(f"nohup {{IDF_CMD}} > /tmp/_idf_restart.log 2>&1 &",
+sp.run(f"nohup {IDF_CMD} > /tmp/_idf_restart.log 2>&1 &",
        shell=True, capture_output=True, text=True, timeout=10, executable="/bin/bash")
 print("MANUAL_START:INITIATED", flush=True)
 
@@ -1873,11 +1872,11 @@ print("WAITING_FOR_IDF...", flush=True)
 for attempt in range(40):
     time.sleep(5)
     try:
-        check = sp.run("curl -s --max-time 5 -o /dev/null -w '%{{http_code}}' http://127.0.0.1:2027/",
+        check = sp.run("curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:2027/",
                        shell=True, capture_output=True, text=True, timeout=8)
         code = check.stdout.strip().replace("'", "")
         if code == "200":
-            print(f"IDF_UP:OK (attempt {{attempt+1}})")
+            print(f"IDF_UP:OK (attempt {attempt+1})")
             break
     except:
         pass

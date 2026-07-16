@@ -454,7 +454,7 @@ def gen_gewm_filter_numeric(etype, schema):
         val2 = random.choice([50, 200, 1024, 2048, 10000])
         patterns_lt = NL_PATTERNS["GetEntitiesWithMetrics"]["filter_lt"]
         nl2 = random.choice(patterns_lt).format(etype=etype, attr=attr, val=val2)
-        proto2 = proto.replace(f"kGT", "kLT").replace(f"uint64_value: {val}", f"uint64_value: {val2}")
+        proto2 = proto.replace("kGT", "kLT").replace(f"uint64_value: {val}", f"uint64_value: {val2}")
         examples.append(make_example(nl2, proto2))
     return examples
 
@@ -628,7 +628,7 @@ def gen_gewm_compound(etype, schema):
             "power_state": "on", "status": "running", "severity": "critical",
             "hypervisor_type": "kKvm", "disk_status": "online",
         }
-        val1 = val1_options.get(attr1, f"active")
+        val1 = val1_options.get(attr1, "active")
         val2 = random.choice([4, 8, 16, 1024, 4096, 8192])
 
         # AND query

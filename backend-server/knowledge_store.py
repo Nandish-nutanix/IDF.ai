@@ -12,10 +12,8 @@ quality by providing real, working examples as few-shot context.
 
 import os
 import re
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-import config
 
 
 def load_tryme_examples(lang: str = "py") -> List[Dict[str, str]]:

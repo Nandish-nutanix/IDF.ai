@@ -13,10 +13,8 @@ import json
 import random
 import subprocess
 import sys
-import os
 import hashlib
 from pathlib import Path
-from itertools import product
 
 random.seed(2026)
 
@@ -1506,359 +1504,359 @@ def generate_all_examples():
 
 # Complex scenario helper functions
 def _complex_vm_powered_off_vcpus():
-    return f'''query {{
-  entity_list {{ entity_type_name: "vm" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "power_state" }} }}
+    return '''query {
+  entity_list { entity_type_name: "vm" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "power_state" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "off" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "off" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "num_vcpus" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "num_vcpus" } }
         operator: kGT
-        rhs {{ leaf {{ value {{ int64_value: 4 }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "vm_name" }}
-    raw_columns {{ column: "power_state" }}
-    raw_columns {{ column: "num_vcpus" }}
-  }}
+        rhs { leaf { value { int64_value: 4 } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "vm_name" }
+    raw_columns { column: "power_state" }
+    raw_columns { column: "num_vcpus" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_vm_high_cpu():
-    return f'''query {{
-  entity_list {{ entity_type_name: "vm" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "cpu_usage_ppm" }} }}
+    return '''query {
+  entity_list { entity_type_name: "vm" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "cpu_usage_ppm" } }
       operator: kGT
-      rhs {{ leaf {{ value {{ int64_value: 800000 }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "vm_name" }}
-    raw_columns {{ column: "cpu_usage_ppm" }}
-    raw_columns {{ column: "num_vcpus" }}
-    raw_sort_order {{
+      rhs { leaf { value { int64_value: 800000 } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "vm_name" }
+    raw_columns { column: "cpu_usage_ppm" }
+    raw_columns { column: "num_vcpus" }
+    raw_sort_order {
       sort_column: "cpu_usage_ppm"
       sort_order: kDescending
-    }}
-  }}
+    }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_vm_high_memory_sorted():
-    return f'''query {{
-  entity_list {{ entity_type_name: "vm" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "memory_usage_ppm" }} }}
+    return '''query {
+  entity_list { entity_type_name: "vm" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "memory_usage_ppm" } }
       operator: kGT
-      rhs {{ leaf {{ value {{ int64_value: 900000 }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "vm_name" }}
-    raw_columns {{ column: "memory_usage_ppm" }}
-    raw_columns {{ column: "memory_size_bytes" }}
-    raw_sort_order {{
+      rhs { leaf { value { int64_value: 900000 } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "vm_name" }
+    raw_columns { column: "memory_usage_ppm" }
+    raw_columns { column: "memory_size_bytes" }
+    raw_sort_order {
       sort_column: "memory_usage_ppm"
       sort_order: kDescending
-    }}
-  }}
+    }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_vm_largest_disk():
-    return f'''query {{
-  entity_list {{ entity_type_name: "vm" }}
-  group_by {{
-    raw_columns {{ column: "vm_name" }}
-    raw_columns {{ column: "disk_capacity_bytes" }}
-    raw_sort_order {{
+    return '''query {
+  entity_list { entity_type_name: "vm" }
+  group_by {
+    raw_columns { column: "vm_name" }
+    raw_columns { column: "disk_capacity_bytes" }
+    raw_sort_order {
       sort_column: "disk_capacity_bytes"
       sort_order: kDescending
-    }}
-    raw_limit {{ limit: 10 }}
-  }}
+    }
+    raw_limit { limit: 10 }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_vm_hypervisor_vcpu():
-    return f'''query {{
-  entity_list {{ entity_type_name: "vm" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "hypervisor_type" }} }}
+    return '''query {
+  entity_list { entity_type_name: "vm" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "hypervisor_type" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "kKvm" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "kKvm" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "num_vcpus" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "num_vcpus" } }
         operator: kGT
-        rhs {{ leaf {{ value {{ int64_value: 8 }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "vm_name" }}
-    raw_columns {{ column: "hypervisor_type" }}
-    raw_columns {{ column: "num_vcpus" }}
-  }}
+        rhs { leaf { value { int64_value: 8 } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "vm_name" }
+    raw_columns { column: "hypervisor_type" }
+    raw_columns { column: "num_vcpus" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_alert_critical_unresolved():
-    return f'''query {{
-  entity_list {{ entity_type_name: "alert" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "severity" }} }}
+    return '''query {
+  entity_list { entity_type_name: "alert" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "severity" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "critical" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "critical" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "resolved" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "resolved" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ bool_value: false }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "title" }}
-    raw_columns {{ column: "severity" }}
-    raw_columns {{ column: "source_entity_name" }}
-  }}
+        rhs { leaf { value { bool_value: false } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "title" }
+    raw_columns { column: "severity" }
+    raw_columns { column: "source_entity_name" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_alert_recent_warnings():
-    return f'''query {{
-  entity_list {{ entity_type_name: "alert" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "severity" }} }}
+    return '''query {
+  entity_list { entity_type_name: "alert" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "severity" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "warning" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "warning" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "creation_time_usecs" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "creation_time_usecs" } }
         operator: kGT
-        rhs {{ leaf {{ value {{ int64_value: 1778570000000000 }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "title" }}
-    raw_columns {{ column: "creation_time_usecs" }}
-    raw_sort_order {{
+        rhs { leaf { value { int64_value: 1778570000000000 } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "title" }
+    raw_columns { column: "creation_time_usecs" }
+    raw_sort_order {
       sort_column: "creation_time_usecs"
       sort_order: kDescending
-    }}
-  }}
+    }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_alert_count_by_severity():
-    return f'''query {{
-  entity_list {{ entity_type_name: "alert" }}
-  group_by {{
+    return '''query {
+  entity_list { entity_type_name: "alert" }
+  group_by {
     group_by_column: "severity"
-    aggregate_columns {{ column: "title" operator: kCount }}
-  }}
+    aggregate_columns { column: "title" operator: kCount }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_task_failed_sorted():
-    return f'''query {{
-  entity_list {{ entity_type_name: "task" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "status" }} }}
+    return '''query {
+  entity_list { entity_type_name: "task" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "status" } }
       operator: kEQ
-      rhs {{ leaf {{ value {{ str_value: "failed" }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "task_type" }}
-    raw_columns {{ column: "status" }}
-    raw_columns {{ column: "start_time_usecs" }}
-    raw_sort_order {{
+      rhs { leaf { value { str_value: "failed" } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "task_type" }
+    raw_columns { column: "status" }
+    raw_columns { column: "start_time_usecs" }
+    raw_sort_order {
       sort_column: "start_time_usecs"
       sort_order: kDescending
-    }}
-    raw_limit {{ limit: 20 }}
-  }}
+    }
+    raw_limit { limit: 20 }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_task_running_low_progress():
-    return f'''query {{
-  entity_list {{ entity_type_name: "task" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "status" }} }}
+    return '''query {
+  entity_list { entity_type_name: "task" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "status" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "running" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "running" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "progress_pct" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "progress_pct" } }
         operator: kLT
-        rhs {{ leaf {{ value {{ int64_value: 50 }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "task_type" }}
-    raw_columns {{ column: "progress_pct" }}
-    raw_columns {{ column: "start_time_usecs" }}
-  }}
+        rhs { leaf { value { int64_value: 50 } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "task_type" }
+    raw_columns { column: "progress_pct" }
+    raw_columns { column: "start_time_usecs" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_node_high_cpu():
-    return f'''query {{
-  entity_list {{ entity_type_name: "node" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "cpu_usage_ppm" }} }}
+    return '''query {
+  entity_list { entity_type_name: "node" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "cpu_usage_ppm" } }
       operator: kGT
-      rhs {{ leaf {{ value {{ int64_value: 700000 }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "node_name" }}
-    raw_columns {{ column: "cpu_usage_ppm" }}
-    raw_columns {{ column: "memory_usage_ppm" }}
-    raw_sort_order {{
+      rhs { leaf { value { int64_value: 700000 } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "node_name" }
+    raw_columns { column: "cpu_usage_ppm" }
+    raw_columns { column: "memory_usage_ppm" }
+    raw_sort_order {
       sort_column: "cpu_usage_ppm"
       sort_order: kDescending
-    }}
-  }}
+    }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_node_degraded():
-    return f'''query {{
-  entity_list {{ entity_type_name: "node" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "is_degraded" }} }}
+    return '''query {
+  entity_list { entity_type_name: "node" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "is_degraded" } }
       operator: kEQ
-      rhs {{ leaf {{ value {{ bool_value: true }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "node_name" }}
-    raw_columns {{ column: "hypervisor_type" }}
-    raw_columns {{ column: "num_vms" }}
-  }}
+      rhs { leaf { value { bool_value: true } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "node_name" }
+    raw_columns { column: "hypervisor_type" }
+    raw_columns { column: "num_vms" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_disk_ssd_high_latency():
-    return f'''query {{
-  entity_list {{ entity_type_name: "disk" }}
-  where_clause {{
-    lhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "storage_tier" }} }}
+    return '''query {
+  entity_list { entity_type_name: "disk" }
+  where_clause {
+    lhs {
+      comparison_expr {
+        lhs { leaf { column: "storage_tier" } }
         operator: kEQ
-        rhs {{ leaf {{ value {{ str_value: "SSD-PCIe" }} }} }}
-      }}
-    }}
+        rhs { leaf { value { str_value: "SSD-PCIe" } } }
+      }
+    }
     operator: kAnd
-    rhs {{
-      comparison_expr {{
-        lhs {{ leaf {{ column: "avg_io_latency_usecs" }} }}
+    rhs {
+      comparison_expr {
+        lhs { leaf { column: "avg_io_latency_usecs" } }
         operator: kGT
-        rhs {{ leaf {{ value {{ int64_value: 5000 }} }} }}
-      }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "serial_number" }}
-    raw_columns {{ column: "avg_io_latency_usecs" }}
-    raw_columns {{ column: "num_iops" }}
-  }}
+        rhs { leaf { value { int64_value: 5000 } } }
+      }
+    }
+  }
+  group_by {
+    raw_columns { column: "serial_number" }
+    raw_columns { column: "avg_io_latency_usecs" }
+    raw_columns { column: "num_iops" }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_disk_top_iops():
-    return f'''query {{
-  entity_list {{ entity_type_name: "disk" }}
-  group_by {{
-    raw_columns {{ column: "serial_number" }}
-    raw_columns {{ column: "num_iops" }}
-    raw_columns {{ column: "storage_tier" }}
-    raw_sort_order {{
+    return '''query {
+  entity_list { entity_type_name: "disk" }
+  group_by {
+    raw_columns { column: "serial_number" }
+    raw_columns { column: "num_iops" }
+    raw_columns { column: "storage_tier" }
+    raw_sort_order {
       sort_column: "num_iops"
       sort_order: kDescending
-    }}
-    raw_limit {{ limit: 5 }}
-  }}
+    }
+    raw_limit { limit: 5 }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 def _complex_container_low_space():
-    return f'''query {{
-  entity_list {{ entity_type_name: "container" }}
-  where_clause {{
-    comparison_expr {{
-      lhs {{ leaf {{ column: "free_space_bytes" }} }}
+    return '''query {
+  entity_list { entity_type_name: "container" }
+  where_clause {
+    comparison_expr {
+      lhs { leaf { column: "free_space_bytes" } }
       operator: kLT
-      rhs {{ leaf {{ value {{ int64_value: 107374182400 }} }} }}
-    }}
-  }}
-  group_by {{
-    raw_columns {{ column: "container_name" }}
-    raw_columns {{ column: "free_space_bytes" }}
-    raw_columns {{ column: "max_capacity_bytes" }}
-    raw_sort_order {{
+      rhs { leaf { value { int64_value: 107374182400 } } }
+    }
+  }
+  group_by {
+    raw_columns { column: "container_name" }
+    raw_columns { column: "free_space_bytes" }
+    raw_columns { column: "max_capacity_bytes" }
+    raw_sort_order {
       sort_column: "free_space_bytes"
       sort_order: kAscending
-    }}
-  }}
+    }
+  }
   query_name: "auto_query"
-}}'''
+}'''
 
 
 # ============================================================

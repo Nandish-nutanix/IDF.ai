@@ -8,9 +8,7 @@ corruption. Read-based operations (cursor, batch, lookup) are executed.
 """
 import sys
 import os
-import json
 import time
-import re
 import subprocess
 import requests
 
@@ -236,7 +234,7 @@ def run_tests():
             continue
 
         print(f"  Classification: OK (type={actual_type}, api={actual_api})")
-        print(f"  Proto validation: OK")
+        print("  Proto validation: OK")
 
         # Execute on cluster if applicable
         if tc.get("execute_on_cluster") and python_code:
@@ -249,7 +247,7 @@ def run_tests():
                 print(f"  Execution: WARN ({exec_msg[:80]})")
                 results.append({"id": tc["id"], "status": "PASS*", "reason": f"Proto OK, exec issue: {exec_msg[:60]}"})
         else:
-            print(f"  (Skipping execution - write/register operation)")
+            print("  (Skipping execution - write/register operation)")
             results.append({"id": tc["id"], "status": "PASS", "reason": "Classification + proto validation OK"})
 
         pass_count += 1

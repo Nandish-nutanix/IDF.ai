@@ -21,7 +21,6 @@ import re
 import sys
 import time
 import requests
-from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from proto_response_generator import _validate_proto
@@ -283,7 +282,7 @@ def run_server_grpo(num_iterations=100, num_generations=4):
                   f"best={best_reward:.2f} | {prompt[:40]}...")
     
     print(f"\n{'=' * 60}")
-    print(f" GRPO Collection Complete")
+    print(" GRPO Collection Complete")
     print(f" Processed: {num_processed}")
     print(f" Avg best reward: {total_reward/max(num_processed,1):.3f}")
     print(f" Improved examples: {len(improved_data)}")
@@ -317,7 +316,7 @@ def run_server_grpo(num_iterations=100, num_generations=4):
     
     print(f"  Training data: {sft_train_path} ({len(improved_data)} examples)")
     print(f"  Validation data: {val_path} ({len(val_items)} examples)")
-    print(f"\n  Starting LoRA fine-tuning on improved data...")
+    print("\n  Starting LoRA fine-tuning on improved data...")
     
     # Stop the MLX server before training to free memory
     print("  Stopping MLX server to free memory for training...")

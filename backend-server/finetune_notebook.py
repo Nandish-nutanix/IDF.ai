@@ -129,7 +129,7 @@ trainer = SFTTrainer(
     ),
 )
 
-print(f"\nTraining config:")
+print("\nTraining config:")
 print(f"  Epochs: {EPOCHS}")
 print(f"  Effective batch: {BATCH_SIZE * GRADIENT_ACCUMULATION}")
 print(f"  Learning rate: {LEARNING_RATE}")
@@ -141,7 +141,7 @@ print(f"  Output: {OUTPUT_DIR}")
 print("\nStarting training...")
 trainer_stats = trainer.train()
 
-print(f"\nTraining complete!")
+print("\nTraining complete!")
 print(f"  Total steps: {trainer_stats.global_step}")
 print(f"  Training loss: {trainer_stats.training_loss:.4f}")
 print(f"  Runtime: {trainer_stats.metrics['train_runtime']:.0f}s")
@@ -197,11 +197,11 @@ with open(modelfile_path, "w") as f:
     f.write(MODELFILE_CONTENT)
 
 print(f"\nOllama Modelfile written to: {modelfile_path}")
-print(f"\nTo register with Ollama:")
+print("\nTo register with Ollama:")
 print(f"  cd {GGUF_OUTPUT}")
-print(f"  ollama create idf-query-7b -f Modelfile")
-print(f"\nThen update config.py:")
-print(f'  CHAT_MODEL = "idf-query-7b"')
+print("  ollama create idf-query-7b -f Modelfile")
+print("\nThen update config.py:")
+print('  CHAT_MODEL = "idf-query-7b"')
 
 # ==============================================================================
 # STEP 9: Quick inference test

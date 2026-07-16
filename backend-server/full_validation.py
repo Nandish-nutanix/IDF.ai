@@ -2,10 +2,8 @@
 Full validation: covers ALL user-facing IDF RPCs.
 Tests classification, proto generation, code generation, and (for safe reads) CVM execution.
 """
-import json
 import subprocess
 import sys
-import time
 import requests
 
 SERVER_URL = "http://localhost:8000/query"
@@ -396,7 +394,7 @@ def run_tests():
 
         if not proto_ok:
             failed += 1
-            results.append({"id": tid, "status": "FAIL", "reason": f"Proto missing keyword"})
+            results.append({"id": tid, "status": "FAIL", "reason": "Proto missing keyword"})
             continue
 
         # Check code keywords
@@ -410,7 +408,7 @@ def run_tests():
 
         if not code_ok:
             failed += 1
-            results.append({"id": tid, "status": "FAIL", "reason": f"Code missing keyword"})
+            results.append({"id": tid, "status": "FAIL", "reason": "Code missing keyword"})
             continue
 
         # Execute on CVM if safe
@@ -436,7 +434,7 @@ def run_tests():
     print(f"{'='*80}")
 
     if failed > 0:
-        print(f"\nFAILED TESTS:")
+        print("\nFAILED TESTS:")
         for r in results:
             if r["status"] == "FAIL":
                 print(f"  [{r['id']}] {r.get('reason', 'unknown')}")

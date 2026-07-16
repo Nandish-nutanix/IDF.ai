@@ -14,7 +14,6 @@ Output: validation_questions.json
 import json
 import os
 import re
-import sys
 
 TEST_DIR = "/Users/nandish.chokshi/Nutanix_New/nutest-py3-tests/testcases/insights"
 WORKFLOW_DIR = "/Users/nandish.chokshi/Nutanix_New/nutest-py3-tests/workflows/insights"

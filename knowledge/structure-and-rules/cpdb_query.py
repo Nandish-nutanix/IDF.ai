@@ -105,7 +105,7 @@
 # TODO: Remove this code when all the code is migrated to py3.
 import sys
 if sys.version_info[0] == 2:
-  import itertools
+  pass
 
 import time
 

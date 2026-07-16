@@ -22,7 +22,7 @@ import json
 import os
 import re
 import threading
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import config
 

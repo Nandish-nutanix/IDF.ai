@@ -2,7 +2,7 @@
 Query validation: structural and real-schema validation.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import schema_chunker
 

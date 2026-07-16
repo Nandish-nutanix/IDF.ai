@@ -18,7 +18,6 @@ import json
 import re
 import subprocess
 import sys
-import time
 import requests
 
 PIPELINE_URL = "http://127.0.0.1:8000/query"
@@ -467,7 +466,7 @@ def call_pipeline(query: str) -> dict:
 def execute_on_cvm(python_code: str, timeout: int = 30) -> dict:
     """Execute Python code on CVM via SSH."""
     code = python_code.replace('InsightsInterface("127.0.0.1"',
-                               f'InsightsInterface("127.0.0.1"')
+                               'InsightsInterface("127.0.0.1"')
     code = re.sub(
         r'InsightsInterface\("[^"]*",\s*"[^"]*"\)',
         'InsightsInterface("127.0.0.1", "2027")',
@@ -605,7 +604,7 @@ def main():
     # Save detailed results
     with open("/tmp/validation_results.json", "w") as f:
         json.dump(results, f, indent=2)
-    print(f"\nDetailed results saved to /tmp/validation_results.json")
+    print("\nDetailed results saved to /tmp/validation_results.json")
 
     return 0 if failed == 0 else 1
 

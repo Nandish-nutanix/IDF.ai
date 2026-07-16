@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import query_classifier
-from proto_response_generator import validate_proto_structure, _ensure_query_wrapper
+from proto_response_generator import validate_proto_structure
 
 
 TEST_QUERIES = [
@@ -181,7 +181,7 @@ def run_tests():
             for err in errors:
                 print(err)
             if proto:
-                print(f"  Generated proto (first 200 chars):")
+                print("  Generated proto (first 200 chars):")
                 print(f"    {proto[:200]}")
             print()
         else:

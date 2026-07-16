@@ -7,9 +7,7 @@ casual language, and validates that only valid attributes are used.
 """
 
 import requests
-import json
-import time
-from typing import Dict, List, Any
+from typing import Dict
 
 API_URL = "http://localhost:3001/generate"
 
@@ -113,7 +111,7 @@ class LanguageTester:
     def print_summary(self):
         """Print test summary"""
         print(f"\n{'='*80}")
-        print(f"TEST SUMMARY")
+        print("TEST SUMMARY")
         print(f"{'='*80}")
         print(f"Total Tests: {self.passed + self.failed}")
         print(f"✅ Passed: {self.passed}")
@@ -122,14 +120,14 @@ class LanguageTester:
         
         if self.invalid_attributes:
             print(f"\n{'='*80}")
-            print(f"INVALID ATTRIBUTES DETECTED:")
+            print("INVALID ATTRIBUTES DETECTED:")
             print(f"{'='*80}")
             for attr in set(self.invalid_attributes):
                 print(f"  • {attr}")
         
         if self.errors:
             print(f"\n{'='*80}")
-            print(f"ERRORS (showing first 10):")
+            print("ERRORS (showing first 10):")
             print(f"{'='*80}")
             for error in self.errors[:10]:
                 print(f"  • {error}")
